@@ -4,7 +4,7 @@ Alembic s'appuie sur cet import : tout nouveau modèle doit être ajouté ici, s
 invisible pour l'autogénération de migration.
 """
 
-from app.models.identity import RefreshToken, User
+from app.models.identity import OneTimeToken, RefreshToken, User
 from app.models.language import ReadingAid, Translation
 from app.models.matching import Icebreaker, Match, Swipe
 from app.models.messaging import Correction, Message, MessageRead
@@ -19,6 +19,7 @@ __all__ = [
     "Match",
     "Message",
     "MessageRead",
+    "OneTimeToken",
     "Profile",
     "ReadingAid",
     "RefreshToken",

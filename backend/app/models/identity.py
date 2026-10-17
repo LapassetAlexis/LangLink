@@ -67,3 +67,30 @@ class RefreshToken(Base):
     created_at: Mapped[dt.datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
+
+
+class OneTimeToken(Base):
+    """Jeton à usage unique : vérification d'email ou réinitialisation de mot de passe.
+
+    Stocké haché (SHA-256) : une fuite de la base ne permet pas de rejouer le jeton.
+    """
+
+    __tablename__ = "one_time_tokens"
+    __table_args__ = (
+        CheckConstraint(
+            "purpose IN ('verify_email','reset_password')", name="purpose_valid"
+        ),
+        Index("idx_one_time_tokens_hash", "token_hash"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid7)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    purpose: Mapped[str] = mapped_column(String(32), nullable=False)
+    token_hash: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    expires_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    used_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[dt.datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )

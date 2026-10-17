@@ -22,7 +22,10 @@ from app.db.base import Base
 config = context.config
 
 if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+    # `disable_existing_loggers` vaut True par défaut : sans cette option, exécuter les
+    # migrations depuis un processus (tests, CLI) coupe les loggers déjà créés — dont
+    # `langlink.access`, rendant la journalisation silencieuse.
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 target_metadata = Base.metadata
 

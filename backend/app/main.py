@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app import __version__
 from app.api.health import router as health_router
+from app.api.v1 import api_router
 from app.core.config import Settings, get_settings
 from app.core.errors import install_error_handlers
 from app.core.middleware import DEFAULT_LIMITS, RateLimitMiddleware, RequestContextMiddleware
@@ -50,6 +51,7 @@ def create_app(
 
     install_error_handlers(app)
     app.include_router(health_router)
+    app.include_router(api_router)
 
     return app
 

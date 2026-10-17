@@ -55,6 +55,12 @@ class Settings(BaseSettings):
     libretranslate_timeout_seconds: float = 5.0
     deepl_api_key: SecretStr | None = None
 
+    # --- OAuth (facultatif : sans identifiants, les routes renvoient 422 « non configuré »)
+    google_client_id: str | None = None
+    google_client_secret: SecretStr | None = None
+    github_client_id: str | None = None
+    github_client_secret: SecretStr | None = None
+
     @field_validator("database_url")
     @classmethod
     def _require_postgres(cls, value: str) -> str:

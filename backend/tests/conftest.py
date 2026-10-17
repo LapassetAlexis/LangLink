@@ -85,12 +85,34 @@ def engine(db_url: str) -> Iterator[Engine]:
     eng.dispose()
 
 
+@pytest.fixture(scope="session")
+def catalog(engine: Engine) -> None:
+    """Amorce le référentiel d'intérêts une fois pour la session (jamais tronqué)."""
+    from app.data.interests import CATALOG
+
+    with engine.begin() as connection:
+        for entry in CATALOG:
+            connection.execute(
+                text(
+                    "INSERT INTO interests (id, slug, label_fr, label_en, emoji, category,"
+                    " sort_order, active) VALUES (:id, :slug, :fr, :en, :emoji, :cat, :ord, true)"
+                    " ON CONFLICT (id) DO NOTHING"
+                ),
+                {
+                    "id": entry[0], "slug": entry[1], "fr": entry[2], "en": entry[3],
+                    "emoji": entry[4], "cat": entry[5], "ord": entry[6],
+                },
+            )
+
+
 @pytest.fixture()
-def clean_engine(engine: Engine) -> Iterator[Engine]:
-    """Vide toutes les tables applicatives avant chaque test."""
+def clean_engine(engine: Engine, catalog: None) -> Iterator[Engine]:
+    """Vide les tables applicatives avant chaque test (le catalogue est préservé)."""
     from app.db.base import Base
 
-    names = ", ".join(t.name for t in Base.metadata.sorted_tables)
+    names = ", ".join(
+        t.name for t in Base.metadata.sorted_tables if t.name != "interests"
+    )
     with engine.begin() as connection:
         connection.execute(text(f"TRUNCATE {names} RESTART IDENTITY CASCADE"))
     yield engine

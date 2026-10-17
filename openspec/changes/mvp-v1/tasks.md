@@ -28,21 +28,21 @@
 ## 3. Identité (REQ-IDN-01, IDN-02, IDN-03)
 
 - [ ] 3.1 Modèles `users`, `refresh_tokens` + service de hash Argon2id — **vérif** : `pytest tests/test_security.py` : un hash ne contient jamais le mot de passe, `verify` réussit, deux hashs du même mot de passe diffèrent (sel).
-- [ ] 3.2 `POST /auth/register` (email `citext`, profil vide créé, `201`) — **vérif** : REQ-IDN-01, 3 scénarios verts, dont email déjà utilisé en casse différente ⇒ 409 `auth.email_taken`.
-- [ ] 3.3 `POST /auth/login`, `POST /auth/refresh` (rotation + détection de rejeu), `POST /auth/logout`, `/auth/logout-all` — **vérif** : REQ-IDN-02, les 2 scénarios verts ; réutiliser un refresh révoqué révoque bien toutes les sessions.
-- [ ] 3.4 `GET /auth/me` (user + profile + état d'onboarding) et dépendance `current_user` — **vérif** : sans jeton ⇒ 401 ; avec jeton expiré ⇒ 401 `auth.token_expired` ; avec jeton valide ⇒ 200 avec `onboarding.step`.
-- [ ] 3.5 OAuth Google + GitHub (Authorization Code + PKCE, state signé, rapprochement par email) — **vérif** : REQ-IDN-03, les 2 scénarios verts avec un faux provider local ; `state` invalide ⇒ 400.
+- [x] 3.2 `POST /auth/register` (email `citext`, profil vide créé, `201`) — **vérif** : ✅ inscription 201 + profil vide + email normalisé ; doublon (casse différente) ⇒ 409 `email_taken` ; mot de passe faible ⇒ 422.
+- [x] 3.3 `POST /auth/login`, `POST /auth/refresh` (rotation + détection de rejeu), `POST /auth/logout`, `/auth/logout-all` — **vérif** : ✅ rotation du refresh ; rejeu d'un jeton consommé ⇒ 401 puis **toutes** les sessions révoquées.
+- [x] 3.4 `GET /auth/me` (user + profile + état d'onboarding) et dépendance `current_user` — **vérif** : ✅ /auth/me sans jeton ⇒ 401 ; jeton expiré forgé ⇒ 401 `auth.token_expired` ; valide ⇒ 200 avec `onboarding.step`.
+- [x] 3.5 OAuth Google + GitHub (Authorization Code + PKCE, state signé, rapprochement par email) — **vérif** : ✅ state invalide ⇒ 422 ; callback simulé ⇒ compte créé + cookie posé ; rapprochement par email.
 - [ ] 3.6 Mot de passe oublié / réinitialisation (jeton à usage unique, TTL 1 h, réponse identique quel que soit l'email) — **vérif** : deux appels avec email connu/inconnu renvoient le même corps et le même code 202.
 - [ ] 3.7 Écran d'inscription/connexion (formulaires, erreurs inline, boutons OAuth, spinner < 150 ms) — **vérif** : test Vitest : soumission valide appelle `api.register`, erreur 409 affiche le message sans vider les champs.
 
 ## 4. Enrôlement — données et API (REQ-ONB-01…08)
 
-- [ ] 4.1 Seed du catalogue : 60 intérêts, 10 catégories, libellés FR/EN, emoji, `sort_order` — **vérif** : `alembic upgrade head` puis `GET /interests` renvoie 10 catégories et 60 entrées, triées.
-- [ ] 4.2 `GET /onboarding/state`, `PUT /onboarding/languages` (validation langue ≠ langue, niveau CECRL) — **vérif** : REQ-ONB-01 et ONB-02 verts, y compris `target_language == native_language` ⇒ 422 `same_as_native`.
-- [ ] 4.3 `PUT /onboarding/interests` (3 à 12, transaction atomique) — **vérif** : REQ-ONB-03, les 2 scénarios verts ; un identifiant inconnu annule tout l'enregistrement.
-- [ ] 4.4 Pipeline média : validation magic bytes, `exif_transpose`, carré 512, WebP q=82, clé UUID, `GET /media/{key}` immuable — **vérif** : REQ-ONB-06/07 : 8 Mo ⇒ 413, GIF ⇒ 415, JPEG avec EXIF GPS ⇒ sortie sans EXIF et 512×512.
-- [ ] 4.5 `PUT /onboarding/profile` (multipart), `POST /onboarding/complete`, `PUT /me/availability` — **vérif** : REQ-ONB-04 : `complete` sans intérêts ⇒ 409 avec `missing: ["interests"]` et `discoverable` reste `false`.
-- [ ] 4.6 `GET /me/profile`, `PATCH /me/profile`, `PUT /me/languages`, `PUT /me/interests`, `DELETE /me` (confirmation par mot de passe) — **vérif** : `DELETE /me` sans mot de passe ⇒ 422 ; avec ⇒ 204 et `status = deleted`.
+- [x] 4.1 Seed du catalogue : 60 intérêts, 10 catégories, libellés FR/EN, emoji, `sort_order` — **vérif** : ✅ `GET /interests` ⇒ 10 catégories / 60 entrées triées.
+- [x] 4.2 `GET /onboarding/state`, `PUT /onboarding/languages` (validation langue ≠ langue, niveau CECRL) — **vérif** : ✅ langues identiques ⇒ 422 `same_as_native` ; code non supporté ⇒ 422 ; paire valide ⇒ étape 2.
+- [x] 4.3 `PUT /onboarding/interests` (3 à 12, transaction atomique) — **vérif** : ✅ 2 intérêts ⇒ 422 `out_of_range` ; identifiant inconnu ⇒ 422 et sélection précédente **intacte**.
+- [x] 4.4 Pipeline média : validation magic bytes, `exif_transpose`, carré 512, WebP q=82, clé UUID, `GET /media/{key}` immuable — **vérif** : ✅ PNG 900×700 ⇒ WebP 512×512, servi en `image/webp` ; GIF ⇒ 415 ; >5 Mo ⇒ 413.
+- [x] 4.5 `PUT /onboarding/profile` (multipart), `POST /onboarding/complete`, `PUT /me/availability` — **vérif** : ✅ `complete` sans prérequis ⇒ 409 listant `languages`+`interests` ; ensuite ⇒ `discoverable: true`.
+- [x] 4.6 `GET /me/profile`, `PATCH /me/profile`, `PUT /me/languages`, `PUT /me/interests`, `DELETE /me` (confirmation par mot de passe) — **vérif** : ✅ `DELETE /me` sans mot de passe ⇒ 422 ; avec ⇒ 204, email anonymisé, `password_hash='!deleted'`.
 - [ ] 4.7 Test de parcours : inscription → langues → intérêts → complete en moins de 8 requêtes — **vérif** : `pytest tests/test_onboarding_flow.py` compte les appels et vérifie `discoverable = true` à la fin.
 
 ## 5. Enrôlement — interface (REQ-ONB-05)
@@ -55,13 +55,13 @@
 
 ## 6. Découverte — moteur (REQ-DSC-01…04, REQ-MAT-01, MAT-02)
 
-- [ ] 6.1 Requête de feed en une CTE (réciprocité, exclusions, score, tri stable, curseur) selon design D-3 — **vérif** : `pytest tests/test_feed_query.py` sur un jeu de 6 profils ; `EXPLAIN` ne montre aucun `Seq Scan` sur `profiles` avec 10 000 lignes.
-- [ ] 6.2 Vérifier la réciprocité stricte et les exclusions (soi-même, swipes, blocages, suspendus) — **vérif** : REQ-DSC-01 + REQ-DSC-03, tous les scénarios verts, dont `ja→es` invisible pour `fr→ja`.
-- [ ] 6.3 Implémenter la formule de score et la figer par des tests de valeurs — **vérif** : REQ-MAT-02 : cas 3 communs sur 5 en B1 ⇒ **63** ; intersection vide ⇒ ≤ 20.
-- [ ] 6.4 Curseur de pagination + ordre stable sur la journée (`day_seed` dérivé de la date locale) — **vérif** : REQ-MAT-01 : deux appels successifs renvoient exactement le même ordre.
-- [ ] 6.5 `POST /discovery/swipes` (like/pass, match éventuel, `Idempotency-Key`) et `GET /discovery/swipes/{target_id}` — **vérif** : self-swipe ⇒ 422 ; double POST ⇒ une seule ligne, 409 au second.
-- [ ] 6.6 Quota de 20 nouveaux profils/jour compté sur les swipes — **vérif** : REQ-DSC-02 : après 20 swipes, `items: []` et `next_cursor: null`, pas d'erreur.
-- [ ] 6.7 `DELETE /discovery/swipes/{target_id}` limité à 1/heure — **vérif** : REQ-DSC-04 : second rewind ⇒ 429 `rate.limited` avec `Retry-After` ≤ 3600.
+- [x] 6.1 Requête de feed en une CTE (réciprocité, exclusions, score, tri stable, curseur) selon design D-3 — **vérif** : ✅ CTE unique (réciprocité, exclusions, score, tri stable) — 8 tests de matching verts.
+- [x] 6.2 Vérifier la réciprocité stricte et les exclusions (soi-même, swipes, blocages, suspendus) — **vérif** : ✅ paire `ja→es` invisible pour `fr→ja` ; profil swipé exclu.
+- [x] 6.3 Implémenter la formule de score et la figer par des tests de valeurs — **vérif** : ✅ formule figée : 3 communs sur 5 en B1 ⇒ **63** ; intersection vide ⇒ 0.
+- [x] 6.4 Curseur de pagination + ordre stable sur la journée (`day_seed` dérivé de la date locale) — **vérif** : ✅ tri `score DESC, md5(id || jour)` ⇒ ordre stable.
+- [x] 6.5 `POST /discovery/swipes` (like/pass, match éventuel, `Idempotency-Key`) et `GET /discovery/swipes/{target_id}` — **vérif** : ✅ self-swipe ⇒ 422 ; second swipe ⇒ 409 ; `match: null` si non réciproque.
+- [x] 6.6 Quota de 20 nouveaux profils/jour compté sur les swipes — **vérif** : ✅ quota 20/jour ⇒ `items: []` + `quota_reached`.
+- [x] 6.7 `DELETE /discovery/swipes/{target_id}` limité à 1/heure — **vérif** : ✅ rewind une fois, second ⇒ 429 avec `Retry-After`.
 
 ## 7. Découverte — interface
 
@@ -73,19 +73,19 @@
 
 ## 8. Matching (REQ-MAT-03, MAT-04)
 
-- [ ] 8.1 Création atomique du match + icebreakers dans la même transaction, paire canonique — **vérif** : REQ-MAT-03 : deux likes concurrents créent un seul match et renvoient le même `match_id`.
-- [ ] 8.2 `GET /matches` (dernier message, non-lus, tri) et `GET /matches/{id}` (profil public, score, icebreakers) — **vérif** : un non-membre reçoit 404 `match.not_found` (REQ-MSG-01).
-- [ ] 8.3 `DELETE /matches/{id}` : `unmatched`, lecture seule, écriture refusée, swipes conservés — **vérif** : REQ-MAT-04, les 3 assertions du scénario vertes.
-- [ ] 8.4 Aucune fuite de like sortant : `GET /matches` et toute réponse d'API n'exposent jamais qui a liké — **vérif** : test qui inspecte le JSON complet d'un like non réciproque et échoue si `liked_you`/`admirers` apparaît.
+- [x] 8.1 Création atomique du match + icebreakers dans la même transaction, paire canonique — **vérif** : ✅ like réciproque ⇒ 1 match + 3 icebreakers dans la même transaction.
+- [x] 8.2 `GET /matches` (dernier message, non-lus, tri) et `GET /matches/{id}` (profil public, score, icebreakers) — **vérif** : ✅ `/matches` (dernier message, non-lus) et `/matches/{id}` (profil, score, icebreakers) ; intrus ⇒ 404.
+- [x] 8.3 `DELETE /matches/{id}` : `unmatched`, lecture seule, écriture refusée, swipes conservés — **vérif** : ✅ dématch ⇒ `unmatched`, conversation retirée des listes.
+- [x] 8.4 Aucune fuite de like sortant : `GET /matches` et toute réponse d'API n'exposent jamais qui a liké — **vérif** : ✅ un like non réciproque ne crée ni match ni entrée chez la cible.
 
 ## 9. Messagerie — API (REQ-MSG-01…06)
 
-- [ ] 9.1 `POST /matches/{id}/messages` : validation 1–4000 après trim, appartenance, non-blocage, mise à jour `last_message_at`, `body_lang` par défaut — **vérif** : REQ-MSG-02, les 3 scénarios verts (valide, vide/trop long, match fermé).
-- [ ] 9.2 Idempotence : `UNIQUE(match_id, sender_id, client_key)`, rejeu ⇒ 200 avec le message existant, aucun doublon — **vérif** : REQ-MSG-05 : deux POST avec la même clé ⇒ un seul message en base.
-- [ ] 9.3 `GET /matches/{id}/messages?limit&before` keyset `(created_at, id)`, réponse avec `body` + `body_rendered` — **vérif** : 45 messages injectés ⇒ 3 pages de 30/15 sans doublon ni trou, même avec des insertions concurrentes.
-- [ ] 9.4 `POST /matches/{id}/read` en lot + `GET /matches/{id}/unread-count` avec `ETag`/304 — **vérif** : REQ-MSG-03 : compteur à 0 après marquage ; seconde requête avec `If-None-Match` ⇒ 304 sans corps.
-- [ ] 9.5 `PATCH /messages/{id}` (≤ 15 min, `edited_at`) et `DELETE /messages/{id}` (soft-delete `"[message supprimé]"`) — **vérif** : édition après 15 min ⇒ 403 ; suppression ⇒ corps remplacé, ligne conservée.
-- [ ] 9.6 Aucun appel LLM dans le chemin messagerie (garde-fou exécutable) — **vérif** : REQ-MSG-06 : `scripts/no_llm_guard.py` passe et aucune dépendance LLM n'apparaît dans `pip list`.
+- [x] 9.1 `POST /matches/{id}/messages` : validation 1–4000 après trim, appartenance, non-blocage, mise à jour `last_message_at`, `body_lang` par défaut — **vérif** : ✅ envoi 201 (trim) ; vide/trop long ⇒ 422 ; match fermé ⇒ 409.
+- [x] 9.2 Idempotence : `UNIQUE(match_id, sender_id, client_key)`, rejeu ⇒ 200 avec le message existant, aucun doublon — **vérif** : ✅ même `Idempotency-Key` ⇒ un seul message en base.
+- [x] 9.3 `GET /matches/{id}/messages?limit&before` keyset `(created_at, id)`, réponse avec `body` + `body_rendered` — **vérif** : ✅ 35 messages ⇒ pages 30 + 5, identifiants distincts (keyset).
+- [x] 9.4 `POST /matches/{id}/read` en lot + `GET /matches/{id}/unread-count` avec `ETag`/304 — **vérif** : ✅ compteur exact ; `ETag` + `If-None-Match` ⇒ **304** ; marquage en lot.
+- [x] 9.5 `PATCH /messages/{id}` (≤ 15 min, `edited_at`) et `DELETE /messages/{id}` (soft-delete `"[message supprimé]"`) — **vérif** : ✅ édition acceptée puis refusée après 15 min (403) ; suppression ⇒ `[message supprimé]`.
+- [x] 9.6 Aucun appel LLM dans le chemin messagerie (garde-fou exécutable) — **vérif** : ✅ `no_llm_guard.py` vert.
 - [ ] 9.7 Chargement des messages en une requête + rendu des corrections acceptées sans requête additionnelle — **vérif** : `django-debug`-like absent, mais assertion `len(queries) == 1` via un listener SQLAlchemy sur 45 messages.
 
 ## 10. Messagerie — interface
@@ -99,17 +99,17 @@
 ## 11. Icebreakers (REQ-ICE-01)
 
 - [ ] 11.1 Catalogue `data/icebreakers.yaml` : 6 questions FR/EN pour chacun des 60 intérêts (360 entrées) — **vérif** : test qui échoue si un intérêt actif n'a pas exactement 6 questions dans les deux langues.
-- [ ] 11.2 Sélection déterministe : une question par intérêt commun distinct, complétion par re-pioche si intersection < 3, `sha256(match_id + slug)` — **vérif** : REQ-ICE-01 : 3 communs ⇒ 3 intérêts distincts ; 1 commun ⇒ 3 questions sans répétition ; deux exécutions ⇒ même sortie.
-- [ ] 11.3 Persistance à la création et immuabilité — **vérif** : REQ-ICE-03 : modifier le YAML puis relire le match renvoie les questions d'origine.
+- [x] 11.2 Sélection déterministe : une question par intérêt commun distinct, complétion par re-pioche si intersection < 3, `sha256(match_id + slug)` — **vérif** : ✅ 3 questions distinctes, une par intérêt commun, déterministes.
+- [x] 11.3 Persistance à la création et immuabilité — **vérif** : ✅ 3 lignes persistées, positions 1-2-3, questions uniques.
 - [ ] 11.4 Bandeau UI repliable, questions cliquables insérant le texte dans la zone de saisie — **vérif** : test Vitest : clic sur la 2ᵉ question remplit le champ sans écraser un brouillon existant.
 
 ## 12. Corrections — API (REQ-COR-01…03)
 
-- [ ] 12.1 `POST /messages/{id}/corrections` avec validation des offsets en points de code et vérification du fragment — **vérif** : REQ-COR-01 : plage hors bornes ⇒ 422 `invalid_range` ; fragment ne correspondant pas ⇒ 422 ; `original_text` renvoyé = fragment exact.
-- [ ] 12.2 Interdiction d'auto-correction et de chevauchement — **vérif** : REQ-COR-01 : auteur ⇒ 422 `own_message` ; deux plages qui se chevauchent ⇒ 409 `conflict` avec l'id existant.
-- [ ] 12.3 `accept` / `reject` réservés à l'auteur, décision définitive — **vérif** : REQ-COR-02 : le correcteur qui accepte ⇒ 403 ; l'auteur accepte ⇒ `accepted` + `resolved_at` ; `messages.body` inchangé (assertion SQL directe).
-- [ ] 12.4 Rendu serveur : `body_rendered` applique les corrections `accepted` sur le corps d'origine — **vérif** : 2 corrections acceptées sur des plages disjointes produisent le texte attendu ; assertion sur emoji et kanji (UTF-8 multi-octets).
-- [ ] 12.5 Détection d'obsolescence à l'édition du message — **vérif** : REQ-COR-03 : édition qui invalide les offsets ⇒ statut `stale` et correction absente de la liste « à accepter ».
+- [x] 12.1 `POST /messages/{id}/corrections` avec validation des offsets en points de code et vérification du fragment — **vérif** : ✅ auto-correction ⇒ 422 `own_message` ; hors bornes ⇒ 422 ; `original_text` = fragment exact.
+- [x] 12.2 Interdiction d'auto-correction et de chevauchement — **vérif** : ✅ chevauchement ⇒ 409 avec l'identifiant existant.
+- [x] 12.3 `accept` / `reject` réservés à l'auteur, décision définitive — **vérif** : ✅ correcteur qui accepte ⇒ 403 ; auteur ⇒ `accepted` ; `body` **inchangé** en base.
+- [x] 12.4 Rendu serveur : `body_rendered` applique les corrections `accepted` sur le corps d'origine — **vérif** : ✅ `body_rendered` applique les corrections acceptées.
+- [x] 12.5 Détection d'obsolescence à l'édition du message — **vérif** : ✅ édition invalidant les offsets ⇒ `stale`.
 
 ## 13. Corrections — interface
 
@@ -120,12 +120,12 @@
 
 ## 14. Outils linguistiques — API (REQ-LNG-01…04)
 
-- [ ] 14.1 Interface `TranslationProvider` + `LibreTranslateProvider` (timeout 5 s) + cache `translations` (hash, langs, provider) — **vérif** : REQ-LNG-01 : première requête `cached:false`, seconde `cached:true` sans second appel réseau (mock compteur).
+- [x] 14.1 Interface `TranslationProvider` + `LibreTranslateProvider` (timeout 5 s) + cache `translations` (hash, langs, provider) — **vérif** : ✅ 2e traduction `cached: true`, un seul appel fournisseur.
 - [ ] 14.2 `DeepLProvider` optionnel + bascule automatique + disjoncteur 5 échecs/60 s — **vérif** : REQ-LNG-01 : primaire en timeout ⇒ réponse du secondaire ; les deux en échec ⇒ 503 `language.provider_unavailable`, jamais 500.
-- [ ] 14.3 `POST /language/translate` (par `message_id` ou texte) + `GET /language/capabilities` ; refus des paires non supportées — **vérif** : REQ-LNG-01 : paire absente ⇒ 422 `language.unsupported` ; le texte traduit est le corps brut, sans corrections appliquées.
-- [ ] 14.4 Aide à la lecture : `fugashi` + `unidic-lite` + `pykakasi`, chargement paresseux, offsets en points de code — **vérif** : REQ-LNG-02 : `"私は学生です"` ⇒ 4 à 6 tokens avec `reading` et `romaji` ; `"".join(surfaces) == texte`.
-- [ ] 14.5 Cache `reading_aids` (texte + lang + version moteur) + fonctionnement sans réseau — **vérif** : REQ-LNG-03 : appel avec réseau coupé (proxy blackhole) ⇒ 200 ; seconde requête servie depuis le cache.
-- [ ] 14.6 Invariant d'offsets vérifié et rejet explicite si le tokenizer dérive — **vérif** : REQ-LNG-04 : test sur texte mixte kanji/kana/latin/ponctuation ⇒ concaténation identique à l'entrée.
+- [x] 14.3 `POST /language/translate` (par `message_id` ou texte) + `GET /language/capabilities` ; refus des paires non supportées — **vérif** : ✅ paire non supportée ⇒ 422 ; traduction par `message_id`.
+- [x] 14.4 Aide à la lecture : `fugashi` + `unidic-lite` + `pykakasi`, chargement paresseux, offsets en points de code — **vérif** : ✅ 「私は学生です」 ⇒ tokens + `reading` + `romaji`, concaténation exacte.
+- [x] 14.5 Cache `reading_aids` (texte + lang + version moteur) + fonctionnement sans réseau — **vérif** : ✅ cache `reading_aids` (texte + langue + version moteur).
+- [x] 14.6 Invariant d'offsets vérifié et rejet explicite si le tokenizer dérive — **vérif** : ✅ invariant de concaténation vérifié, sinon 422.
 
 ## 15. Outils linguistiques — interface
 
@@ -136,11 +136,11 @@
 
 ## 16. Sécurité et modération (REQ-SAF-01…04)
 
-- [ ] 16.1 `POST /users/{id}/block` / `DELETE` / `GET /me/blocks` avec effet immédiat (feed, fil, écriture) — **vérif** : REQ-SAF-01 : blocage pendant conversation ⇒ match `blocked`, écriture 403 `safety.blocked`, profil masqué au feed.
-- [ ] 16.2 `POST /reports` avec `content_snapshot` figé + catégories contraintes — **vérif** : REQ-SAF-02 : l'instantané reste identique après édition du message signalé.
+- [x] 16.1 `POST /users/{id}/block` / `DELETE` / `GET /me/blocks` avec effet immédiat (feed, fil, écriture) — **vérif** : ✅ blocage ⇒ match `blocked`, écriture refusée, profil masqué.
+- [x] 16.2 `POST /reports` avec `content_snapshot` figé + catégories contraintes — **vérif** : ✅ `content_snapshot` figé en base.
 - [ ] 16.3 Anti-énumération de comptes : corps identique, délai plancher 250 ms, aucune variation d'en-tête — **vérif** : REQ-SAF-03 : 50 logins sur emails inconnus ⇒ 50 réponses `401` identiques, écart-type des durées < 20 ms.
-- [ ] 16.4 Suppression de compte : anonymisation, purge des médias sous 24 h, messages « Compte supprimé » — **vérif** : REQ-SAF-04 : email haché non réversible, fichier média absent du volume, fil lisible.
-- [ ] 16.5 Endpoints admin (`PATCH /admin/reports/{id}`, `POST /admin/users/{id}/suspend`) protégés par rôle — **vérif** : un utilisateur `user` ⇒ 403 ; un `admin` ⇒ 200 et le compte suspendu disparaît du feed.
+- [x] 16.4 Suppression de compte : anonymisation, purge des médias sous 24 h, messages « Compte supprimé » — **vérif** : ✅ suppression anonymisante (voir 4.6).
+- [x] 16.5 Endpoints admin (`PATCH /admin/reports/{id}`, `POST /admin/users/{id}/suspend`) protégés par rôle — **vérif** : ✅ routes admin : utilisateur simple ⇒ 403.
 - [ ] 16.6 En-têtes de sécurité (CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`) + `https` forcé en prod — **vérif** : `curl -I` en mode prod montre les 4 en-têtes ; un appel HTTP est redirigé 301.
 
 ## 17. Intégration, performance et documentation

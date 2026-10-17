@@ -1,9 +1,9 @@
 # Matrice de couverture — mvp-v1
 
 - Exigences : **44**
-- Couvertes par au moins un test : **3**
+- Couvertes par au moins un test : **6**
 - Scénarios : **71**
-- Orphelines : **41**
+- Orphelines : **38**
 
 | Exigence | Capacité | Scénarios | Tests |
 |---|---|---|---|
@@ -15,7 +15,7 @@
 | `REQ-DSC-03` — Quota quotidien de découverte | discovery | 1 | — **orpheline** |
 | `REQ-DSC-04` — Rewind borné | discovery | 1 | — **orpheline** |
 | `REQ-ICE-01` — Trois questions issues des intérêts communs | icebreakers | 3 | — **orpheline** |
-| `REQ-IDN-01` — Inscription par email | identity | 3 | — **orpheline** |
+| `REQ-IDN-01` — Inscription par email | identity | 3 | `backend/tests/test_identity.py` |
 | `REQ-IDN-02` — Sessions et rotation des jetons | identity | 2 | — **orpheline** |
 | `REQ-IDN-03` — Connexion OAuth | identity | 2 | — **orpheline** |
 | `REQ-LNG-01` — Traduction à la demande | language-tools | 3 | — **orpheline** |
@@ -23,7 +23,7 @@
 | `REQ-LNG-03` — Aucune dépendance réseau pour l'aide à la lecture | language-tools | 1 | — **orpheline** |
 | `REQ-LNG-04` — Exactitude des offsets | language-tools | 1 | — **orpheline** |
 | `REQ-MAT-01` — Score d'affinité explicable | matching | 2 | — **orpheline** |
-| `REQ-MAT-02` — Création du match sur like mutuel | matching | 2 | — **orpheline** |
+| `REQ-MAT-02` — Création du match sur like mutuel | matching | 2 | `backend/tests/test_matching.py` |
 | `REQ-MAT-03` — Dématch | matching | 1 | — **orpheline** |
 | `REQ-MAT-04` — Déterminisme du classement | matching | 1 | — **orpheline** |
 | `REQ-MSG-01` — Accès restreint au fil | messaging | 1 | — **orpheline** |
@@ -32,7 +32,7 @@
 | `REQ-MSG-04` — Marquage de lecture naturel | messaging | 1 | — **orpheline** |
 | `REQ-MSG-05` — Asynchronisme assumé | messaging | 1 | — **orpheline** |
 | `REQ-MSG-06` — Pas de contenu généré | messaging | 1 | — **orpheline** |
-| `REQ-ONB-01` — Onboarding actionnable en moins de 3 minutes | onboarding | 2 | — **orpheline** |
+| `REQ-ONB-01` — Onboarding actionnable en moins de 3 minutes | onboarding | 2 | `backend/tests/test_onboarding.py` |
 | `REQ-ONB-02` — Validation de l'étape 1 | onboarding | 2 | — **orpheline** |
 | `REQ-ONB-03` — Seuil d'intérêts | onboarding | 2 | — **orpheline** |
 | `REQ-ONB-04` — Finalisation de l'onboarding | onboarding | 1 | — **orpheline** |
@@ -70,9 +70,6 @@
 - `REQ-ICE-01` — Intérêts communs suffisants
 - `REQ-ICE-01` — Un seul intérêt commun
 - `REQ-ICE-01` — Stabilité dans le temps
-- `REQ-IDN-01` — Inscription valide
-- `REQ-IDN-01` — Email déjà utilisé
-- `REQ-IDN-01` — Mot de passe faible
 - `REQ-IDN-02` — Refresh valide
 - `REQ-IDN-02` — Réutilisation d'un refresh révoqué
 - `REQ-IDN-03` — Premier login OAuth
@@ -86,8 +83,6 @@
 - `REQ-LNG-04` — Texte mixte
 - `REQ-MAT-01` — Trois intérêts communs sur cinq
 - `REQ-MAT-01` — Aucun intérêt commun
-- `REQ-MAT-02` — Like réciproque
-- `REQ-MAT-02` — Like non réciproque
 - `REQ-MAT-03` — Dématch unilatéral
 - `REQ-MAT-04` — Deux appels successifs
 - `REQ-MSG-01` — Intrusion
@@ -99,8 +94,6 @@
 - `REQ-MSG-04` — Fil ouvert
 - `REQ-MSG-05` — Perte de connexion pendant la rédaction
 - `REQ-MSG-06` — Audit du produit
-- `REQ-ONB-01` — Inscription jusqu'au discovery
-- `REQ-ONB-01` — Reprise après interruption
 - `REQ-ONB-02` — Langues identiques
 - `REQ-ONB-02` — Langue non supportée
 - `REQ-ONB-03` — Deux intérêts seulement
