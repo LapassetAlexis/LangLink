@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -20,6 +22,20 @@ DESCRIPTION = (
 )
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Amorce le référentiel d'intérêts au démarrage (idempotent)."""
+    from app.db.session import get_sessionmaker
+    from app.services.catalog import ensure_catalog
+
+    try:
+        async with get_sessionmaker()() as session:
+            await ensure_catalog(session)
+    except Exception:  # noqa: BLE001 - la base peut être encore indisponible
+        pass
+    yield
+
+
 def create_app(
     settings: Settings | None = None,
     *,
@@ -29,6 +45,7 @@ def create_app(
     config = settings or get_settings()
 
     app = FastAPI(
+        lifespan=lifespan,
         title="LangLink API",
         version=__version__,
         description=DESCRIPTION,
