@@ -1,9 +1,9 @@
 # Matrice de couverture — mvp-v1
 
 - Exigences : **44**
-- Couvertes par au moins un test : **0**
+- Couvertes par au moins un test : **3**
 - Scénarios : **71**
-- Orphelines : **44**
+- Orphelines : **41**
 
 | Exigence | Capacité | Scénarios | Tests |
 |---|---|---|---|
@@ -40,13 +40,13 @@
 | `REQ-ONB-06` — Étape 3 sautable | onboarding | 1 | — **orpheline** |
 | `REQ-ONB-07` — Robustesse de la photo | onboarding | 2 | — **orpheline** |
 | `REQ-ONB-08` — Intérêts stables et traduisibles | onboarding | 2 | — **orpheline** |
-| `REQ-PLT-01` — Intégrité du schéma | platform | 2 | — **orpheline** |
-| `REQ-PLT-02` — Aucun échec silencieux | platform | 2 | — **orpheline** |
+| `REQ-PLT-01` — Intégrité du schéma | platform | 2 | `backend/tests/test_schema_integrity.py` |
+| `REQ-PLT-02` — Aucun échec silencieux | platform | 2 | `backend/tests/test_errors.py` |
 | `REQ-PLT-03` — Navigation clavier du discovery | platform | 1 | — **orpheline** |
 | `REQ-PLT-04` — Accessibilité des états | platform | 1 | — **orpheline** |
 | `REQ-PLT-05` — Contrat OpenAPI versionné | platform | 1 | — **orpheline** |
 | `REQ-PLT-06` — Tests obligatoires par exigence | platform | 1 | — **orpheline** |
-| `REQ-PLT-07` — Observabilité minimale | platform | 1 | — **orpheline** |
+| `REQ-PLT-07` — Observabilité minimale | platform | 1 | `backend/tests/test_health.py`, `backend/tests/test_request_id.py` |
 | `REQ-SAF-01` — Effet immédiat du blocage | safety | 1 | — **orpheline** |
 | `REQ-SAF-02` — Signalement conservant la preuve | safety | 1 | — **orpheline** |
 | `REQ-SAF-03` — Protection contre l'énumération de comptes | safety | 1 | — **orpheline** |
@@ -112,15 +112,10 @@
 - `REQ-ONB-07` — Format non supporté
 - `REQ-ONB-08` — Chargement du catalogue
 - `REQ-ONB-08` — Retrait d'un intérêt
-- `REQ-PLT-01` — Double swipe concurrent
-- `REQ-PLT-01` — Match dupliqué
-- `REQ-PLT-02` — Envoi refusé
-- `REQ-PLT-02` — Traduction en échec
 - `REQ-PLT-03` — Like au clavier
 - `REQ-PLT-04` — Nouveau message
 - `REQ-PLT-05` — Dérive de contrat
 - `REQ-PLT-06` — Scénario orphelin
-- `REQ-PLT-07` — Sonde de disponibilité
 - `REQ-SAF-01` — Blocage pendant une conversation
 - `REQ-SAF-02` — Signalement d'un message
 - `REQ-SAF-03` — Login avec email inconnu

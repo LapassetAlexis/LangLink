@@ -65,6 +65,12 @@ jobs:
       - name: Garde-fou P2 (aucun LLM)
         run: python scripts/no_llm_guard.py
 
+      - name: Contrat OpenAPI à jour
+        # Si un schéma change sans que openapi.json soit régénéré, la CI échoue.
+        run: |
+          python scripts/export_openapi.py
+          git diff --exit-code -- openapi.json
+
       - name: Matrice de couverture
         # --report-only tant que l'implémentation est en cours ; devient bloquant
         # à la tâche 17.3 (tous les scénarios couverts).
@@ -96,6 +102,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
+      - run: npm run check:api
       - run: npm test
       - run: npm run build
 

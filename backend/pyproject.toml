@@ -12,7 +12,7 @@ dependencies = [
     "uvicorn[standard]>=0.32",
     "pydantic>=2.9",
     "pydantic-settings>=2.6",
-    "sqlalchemy>=2.0.36",
+    "sqlalchemy[asyncio]>=2.0.36",
     "alembic>=1.14",
     "psycopg[binary]>=3.2",
     "pyjwt>=2.10",
@@ -58,6 +58,7 @@ warn_unreachable = true
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-q --strict-markers"
+asyncio_mode = "auto"
 markers = [
     "perf: tests de performance (désactivables avec --no-perf)",
 ]
