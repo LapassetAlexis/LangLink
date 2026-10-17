@@ -256,6 +256,7 @@ describe('Fil de discussion', () => {
     // La question est affichée en texte ; c'est le bouton « Utiliser » qui l'insère.
     expect(await screen.findByText('À quel jeu joues-tu ?')).toBeInTheDocument()
     const [useFirst] = screen.getAllByRole('button', { name: 'Utiliser' })
+    if (!useFirst) throw new Error('bouton Utiliser introuvable')
     await userEvent.click(useFirst)
 
     expect(screen.getByPlaceholderText('Écrire un message…')).toHaveValue('À quel jeu joues-tu ?')
