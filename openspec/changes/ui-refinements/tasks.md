@@ -23,9 +23,9 @@
 
 ## 5. Aide au mot (mode « mot à mot »)
 
-- [ ] 5.1 Bouton « mot à mot » par message reçu : segmentation par espaces pour les écritures latines, par tokens pour le japonais — **vérif** : test, un message japonais produit des tokens alignés sur les offsets de l'API.
-- [ ] 5.2 Panneau d'aide au clic : sens (via `/language/translate`), lecture + romaji pour le japonais, mention explicite « traduction automatique, sens unique » — **vérif** : test Vitest, clic sur un mot affiche le panneau avec la mention.
-- [ ] 5.3 Backend : `POST /language/lexicon` — récupérer le wikitext via `action=parse`, extraire les lignes `#`, nettoyer les liens `[[…]]`, renvoyer `{part_of_speech, definition}[]` + lecture/romaji si `ja` — **vérif** : test « marché » ⇒ ≥ 2 sens avec catégorie ; « 学生 » ⇒ sens + reading.
+- [x] 5.1 Bouton « mot à mot » par message reçu : segmentation par espaces pour les écritures latines, par tokens pour le japonais — **vérif** : test, un message japonais produit des tokens alignés sur les offsets de l'API. — **vérif** : ✅ mode « mot à mot » par message : japonais segmenté via `readingAid` (aligné sur les offsets de l'API), latin par espaces, retour au texte normal au second clic — test Vitest.
+- [x] 5.2 Panneau d'aide au clic : sens (via `/language/translate`), lecture + romaji pour le japonais, mention explicite « traduction automatique, sens unique » — **vérif** : test Vitest, clic sur un mot affiche le panneau avec la mention. — **vérif** : ✅ panneau au clic : sens multiples numérotés avec catégorie, lecture kana + romaji pour le japonais, mention « Source : Wiktionnaire francophone » ou absence de sens — test Vitest (appel `lexicon('marché','fr')` + définition affichée).
+- [x] 5.3 Backend : `POST /language/lexicon` — récupérer le wikitext via `action=parse`, extraire les lignes `#`, nettoyer les liens `[[…]]`, renvoyer `{part_of_speech, definition}[]` + lecture/romaji si `ja` — **vérif** : test « marché » ⇒ ≥ 2 sens avec catégorie ; « 学生 » ⇒ sens + reading. — **vérif** : ✅ `POST /language/lexicon` livré : wikitext `action=parse`, lignes `#`, exemples `#*` exclus, déduplication, cache mémoire borné — 4 tests, vérifié en production (« marché » 6 sens, « 学生 » 2 sens + がくせい/gakusei).
 - [x] 5.4 Trancher la source lexicale multi-sens (design D-4) — **vérif** : ✅ REST du Wiktionnaire hors service (`501`), `action=parse` + wikitext `#` retenu, vérifié sur « marché » et « 学生 ».
 
 ## 6. Clôture
