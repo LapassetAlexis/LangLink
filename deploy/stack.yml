@@ -4,9 +4,8 @@
 # PAS dans ce fichier : elles sont fournies par les variables d'environnement de la stack
 # (Portainer `Env`), ce qui évite de versionner un secret.
 #
-# Build : les contextes pointent vers le dépôt présent sur l'hôte Docker
-# (`/home/tristabeau/Docker/hermes/workspace/LangLink`), ce qui permet d'itérer sans
-# pousser sur GitHub. Bascule vers une stack « Git repository » quand le code sera publié.
+# Build : stack déployée depuis le dépôt Git ; les contextes sont relatifs au fichier
+# (`../backend`, `../frontend`) et se résolvent dans le clone de Portainer.
 
 name: langlink
 
@@ -42,6 +41,8 @@ services:
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL}
       CORS_ORIGINS: ${PUBLIC_BASE_URL}
       MEDIA_ROOT: /data/uploads
+      LIBRETRANSLATE_URL: http://libretranslate:5000
+      LIBRETRANSLATE_TIMEOUT_SECONDS: "8"
     volumes:
       - langlink_media:/data/uploads
     depends_on:
@@ -50,6 +51,29 @@ services:
     ports:
       - "${API_PORT}:8000"
     # healthcheck /healthz : ajoute a la tache 2.5 (endpoint inexistant pour l'instant)
+
+  libretranslate:
+    image: libretranslate/libretranslate:latest
+    restart: unless-stopped
+    environment:
+      # Seules les langues utiles sont chargées : moins de RAM, démarrage plus court.
+      LT_LOAD_ONLY: "fr,en,ja,es,de"
+      LT_DISABLE_WEB_UI: "true"
+      LT_UPDATE_MODELS: "true"
+      LT_SSL: "false"
+    volumes:
+      # Les modèles (plusieurs centaines de Mo) survivent aux redéploiements.
+      - langlink_lt_models:/home/libretranslate/.local
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request;urllib.request.urlopen('http://127.0.0.1:5000/languages',timeout=3)
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
 
   web:
     build:
@@ -65,3 +89,5 @@ volumes:
     name: langlink_pgdata
   langlink_media:
     name: langlink_media
+  langlink_lt_models:
+    name: langlink_lt_models
