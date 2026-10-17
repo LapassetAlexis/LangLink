@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -23,7 +24,7 @@ DESCRIPTION = (
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Amorce le référentiel d'intérêts au démarrage (idempotent)."""
     from app.db.session import get_sessionmaker
     from app.services.catalog import ensure_catalog
