@@ -33,7 +33,7 @@ services:
 
   api:
     build:
-      context: ${REPO_PATH}/backend
+      context: ../backend
     restart: unless-stopped
     environment:
       ENV: ${APP_ENV}
@@ -49,17 +49,11 @@ services:
         condition: service_healthy
     ports:
       - "${API_PORT}:8000"
-    healthcheck:
-      test:
-        ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
-      interval: 20s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+    # healthcheck /healthz : ajoute a la tache 2.5 (endpoint inexistant pour l'instant)
 
   web:
     build:
-      context: ${REPO_PATH}/frontend
+      context: ../frontend
     restart: unless-stopped
     depends_on:
       - api
@@ -68,4 +62,6 @@ services:
 
 volumes:
   langlink_pgdata:
+    name: langlink_pgdata
   langlink_media:
+    name: langlink_media
