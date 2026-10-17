@@ -31,6 +31,25 @@ parsée par le CLI et seront fusionnés dans `openspec/specs/` à l'archivage du
 
 > Aucun code d'implémentation n'est écrit avant la validation de la spec.
 
+## Déploiement actuel
+
+Stack Portainer **`langlink`** sur le Beelink, déployée depuis ce dépôt (`deploy/stack.yml`) :
+
+| Accès | URL |
+|---|---|
+| Application web | http://192.168.1.100:8081 |
+| API (directe) | http://192.168.1.100:8001/api/v1/docs |
+| API via le proxy web | http://192.168.1.100:8081/api/v1/openapi.json |
+
+Le SPA et l'API partagent une seule origine : nginx proxifie `/api/` vers `api:8000`,
+donc aucun CORS. La base PostgreSQL n'est exposée sur le LAN (`:5433`) que pour les tests
+Alembic/pytest ; voir `deploy/README.md`.
+
+## CI
+
+`.github/workflows/ci.yml` — 3 jobs (backend, frontend, specs OpenSpec) exécutés à chaque
+push sur `main`. Dernier run vert : `39070356338`.
+
 ## Lire la spécification
 
 | Fichier | Contenu |
