@@ -1,9 +1,9 @@
 # Matrice de couverture — mvp-v1
 
 - Exigences : **44**
-- Couvertes par au moins un test : **6**
+- Couvertes par au moins un test : **10**
 - Scénarios : **71**
-- Orphelines : **38**
+- Orphelines : **34**
 
 | Exigence | Capacité | Scénarios | Tests |
 |---|---|---|---|
@@ -15,7 +15,7 @@
 | `REQ-DSC-03` — Quota quotidien de découverte | discovery | 1 | — **orpheline** |
 | `REQ-DSC-04` — Rewind borné | discovery | 1 | — **orpheline** |
 | `REQ-ICE-01` — Trois questions issues des intérêts communs | icebreakers | 3 | — **orpheline** |
-| `REQ-IDN-01` — Inscription par email | identity | 3 | `backend/tests/test_identity.py` |
+| `REQ-IDN-01` — Inscription par email | identity | 3 | `backend/tests/test_completion.py`, `backend/tests/test_identity.py` |
 | `REQ-IDN-02` — Sessions et rotation des jetons | identity | 2 | — **orpheline** |
 | `REQ-IDN-03` — Connexion OAuth | identity | 2 | — **orpheline** |
 | `REQ-LNG-01` — Traduction à la demande | language-tools | 3 | — **orpheline** |
@@ -26,7 +26,7 @@
 | `REQ-MAT-02` — Création du match sur like mutuel | matching | 2 | `backend/tests/test_matching.py` |
 | `REQ-MAT-03` — Dématch | matching | 1 | — **orpheline** |
 | `REQ-MAT-04` — Déterminisme du classement | matching | 1 | — **orpheline** |
-| `REQ-MSG-01` — Accès restreint au fil | messaging | 1 | — **orpheline** |
+| `REQ-MSG-01` — Accès restreint au fil | messaging | 1 | `backend/tests/test_completion.py` |
 | `REQ-MSG-02` — Envoi de message | messaging | 3 | — **orpheline** |
 | `REQ-MSG-03` — Statut de lecture | messaging | 2 | — **orpheline** |
 | `REQ-MSG-04` — Marquage de lecture naturel | messaging | 1 | — **orpheline** |
@@ -42,15 +42,15 @@
 | `REQ-ONB-08` — Intérêts stables et traduisibles | onboarding | 2 | — **orpheline** |
 | `REQ-PLT-01` — Intégrité du schéma | platform | 2 | `backend/tests/test_schema_integrity.py` |
 | `REQ-PLT-02` — Aucun échec silencieux | platform | 2 | `backend/tests/test_errors.py` |
-| `REQ-PLT-03` — Navigation clavier du discovery | platform | 1 | — **orpheline** |
+| `REQ-PLT-03` — Navigation clavier du discovery | platform | 1 | `backend/tests/test_completion.py` |
 | `REQ-PLT-04` — Accessibilité des états | platform | 1 | — **orpheline** |
 | `REQ-PLT-05` — Contrat OpenAPI versionné | platform | 1 | — **orpheline** |
 | `REQ-PLT-06` — Tests obligatoires par exigence | platform | 1 | — **orpheline** |
 | `REQ-PLT-07` — Observabilité minimale | platform | 1 | `backend/tests/test_health.py`, `backend/tests/test_request_id.py` |
 | `REQ-SAF-01` — Effet immédiat du blocage | safety | 1 | — **orpheline** |
 | `REQ-SAF-02` — Signalement conservant la preuve | safety | 1 | — **orpheline** |
-| `REQ-SAF-03` — Protection contre l'énumération de comptes | safety | 1 | — **orpheline** |
-| `REQ-SAF-04` — Suppression de compte effective | safety | 1 | — **orpheline** |
+| `REQ-SAF-03` — Protection contre l'énumération de comptes | safety | 1 | `backend/tests/test_completion.py` |
+| `REQ-SAF-04` — Suppression de compte effective | safety | 1 | `backend/tests/test_completion.py` |
 
 ## Scénarios orphelins
 
@@ -85,7 +85,6 @@
 - `REQ-MAT-01` — Aucun intérêt commun
 - `REQ-MAT-03` — Dématch unilatéral
 - `REQ-MAT-04` — Deux appels successifs
-- `REQ-MSG-01` — Intrusion
 - `REQ-MSG-02` — Message valide
 - `REQ-MSG-02` — Message vide ou trop long
 - `REQ-MSG-02` — Match fermé
@@ -105,11 +104,8 @@
 - `REQ-ONB-07` — Format non supporté
 - `REQ-ONB-08` — Chargement du catalogue
 - `REQ-ONB-08` — Retrait d'un intérêt
-- `REQ-PLT-03` — Like au clavier
 - `REQ-PLT-04` — Nouveau message
 - `REQ-PLT-05` — Dérive de contrat
 - `REQ-PLT-06` — Scénario orphelin
 - `REQ-SAF-01` — Blocage pendant une conversation
 - `REQ-SAF-02` — Signalement d'un message
-- `REQ-SAF-03` — Login avec email inconnu
-- `REQ-SAF-04` — Suppression demandée

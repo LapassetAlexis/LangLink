@@ -67,6 +67,20 @@ def create_app(
     app.add_middleware(RateLimitMiddleware, limits=rate_limits or DEFAULT_LIMITS)
     app.add_middleware(RequestContextMiddleware)
 
+    @app.middleware("http")
+    async def security_headers(request, call_next):  # type: ignore[no-untyped-def]
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+        )
+        if config.env == "prod":
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return response
+
     install_error_handlers(app)
     app.include_router(health_router)
     app.include_router(api_router)

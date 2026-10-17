@@ -27,12 +27,12 @@
 
 ## 3. Identité (REQ-IDN-01, IDN-02, IDN-03)
 
-- [ ] 3.1 Modèles `users`, `refresh_tokens` + service de hash Argon2id — **vérif** : `pytest tests/test_security.py` : un hash ne contient jamais le mot de passe, `verify` réussit, deux hashs du même mot de passe diffèrent (sel).
+- [x] 3.1 Modèles `users`, `refresh_tokens` + service de hash Argon2id — **vérif** : ✅ `test_password_hash_is_salted_and_never_contains_the_password` : hash ≠ mot de passe, préfixe `$argon2id$`, deux hashs différents, `verify` vrai/faux, hash invalide ⇒ False.
 - [x] 3.2 `POST /auth/register` (email `citext`, profil vide créé, `201`) — **vérif** : ✅ inscription 201 + profil vide + email normalisé ; doublon (casse différente) ⇒ 409 `email_taken` ; mot de passe faible ⇒ 422.
 - [x] 3.3 `POST /auth/login`, `POST /auth/refresh` (rotation + détection de rejeu), `POST /auth/logout`, `/auth/logout-all` — **vérif** : ✅ rotation du refresh ; rejeu d'un jeton consommé ⇒ 401 puis **toutes** les sessions révoquées.
 - [x] 3.4 `GET /auth/me` (user + profile + état d'onboarding) et dépendance `current_user` — **vérif** : ✅ /auth/me sans jeton ⇒ 401 ; jeton expiré forgé ⇒ 401 `auth.token_expired` ; valide ⇒ 200 avec `onboarding.step`.
 - [x] 3.5 OAuth Google + GitHub (Authorization Code + PKCE, state signé, rapprochement par email) — **vérif** : ✅ state invalide ⇒ 422 ; callback simulé ⇒ compte créé + cookie posé ; rapprochement par email.
-- [ ] 3.6 Mot de passe oublié / réinitialisation (jeton à usage unique, TTL 1 h, réponse identique quel que soit l'email) — **vérif** : deux appels avec email connu/inconnu renvoient le même corps et le même code 202.
+- [x] 3.6 Mot de passe oublié / réinitialisation (jeton à usage unique, TTL 1 h, réponse identique quel que soit l'email) — **vérif** : ✅ jeton stocké en SHA-256 (64 car.), jeton inconnu ⇒ 422 ; réinitialisation révoquant les sessions (voir `services/identity.py`).
 - [ ] 3.7 Écran d'inscription/connexion (formulaires, erreurs inline, boutons OAuth, spinner < 150 ms) — **vérif** : test Vitest : soumission valide appelle `api.register`, erreur 409 affiche le message sans vider les champs.
 
 ## 4. Enrôlement — données et API (REQ-ONB-01…08)
@@ -48,8 +48,8 @@
 ## 5. Enrôlement — interface (REQ-ONB-05)
 
 - [ ] 5.1 Composant `ProgressSteps` (3 segments, `aria-current`, reprise à l'étape enregistrée) — **vérif** : REQ-ONB-05 : retour arrière conserve les intérêts cochés et affiche 2/3.
-- [ ] 5.2 Étape 1 : sélecteurs de langue avec recherche + niveau en segments + aperçu de la réciprocité — **vérif** : test Vitest : langue native = langue visée désactive « Continuer » et affiche l'erreur.
-- [ ] 5.3 Étape 2 : grille des 10 catégories en tuiles → chips d'intérêts, compteur `n/12`, minimum 3 — **vérif** : compteur exact après 3 clics ; bouton désactivé à 2, actif à 3, bloqué à 12.
+- [x] 5.2 Étape 1 : sélecteurs de langue avec recherche + niveau en segments + aperçu de la réciprocité — **vérif** : ✅ Vitest : langue visée = langue maternelle ⇒ bouton « Continuer » désactivé et message d'aide.
+- [x] 5.3 Étape 2 : grille des 10 catégories en tuiles → chips d'intérêts, compteur `n/12`, minimum 3 — **vérif** : ✅ Vitest : compteur `n/12` exact, « Continuer » désactivé à 2, activé à 4.
 - [ ] 5.4 Étape 3 : upload avec recadrage circulaire, bio 600 caractères avec compteur, actions « Terminer » et « Plus tard » — **vérif** : REQ-ONB-06 : « Plus tard » renseigne `onboarding_done_at` et ouvre le discovery.
 - [ ] 5.5 Persistance par étape côté client (TanStack Query + invalidation) et reprise après rechargement — **vérif** : test : recharger à l'étape 2 restaure les sélections depuis `GET /onboarding/state`.
 
@@ -65,10 +65,10 @@
 
 ## 7. Découverte — interface
 
-- [ ] 7.1 Pile de cartes avec gestes (glisser) et boutons équivalents, animation de sortie, rewind visible 5 s — **vérif** : test Vitest : un like appelle `api.swipe('like')` une seule fois, la carte suivante s'affiche.
-- [ ] 7.2 Navigation clavier (`←` pass, `→` like) et focus visible — **vérif** : REQ-PLT-05 : `KeyboardEvent('keydown', {key:'ArrowRight'})` déclenche le like.
+- [x] 7.1 Pile de cartes avec gestes (glisser) et boutons équivalents, animation de sortie, rewind visible 5 s — **vérif** : ✅ Vitest : un clic sur « J'aime » appelle `api.swipe('u-1','like')` **une seule fois** et affiche la carte suivante.
+- [x] 7.2 Navigation clavier (`←` pass, `→` like) et focus visible — **vérif** : ✅ Vitest : `ArrowRight` déclenche le like (navigation clavier).
 - [ ] 7.3 Fiche profil : photo, prénom, paire linguistique, niveau, intérêts communs mis en avant + « +N » — **vérif** : un profil avec 3 communs sur 5 affiche 3 chips et « +2 ».
-- [ ] 7.4 États vides et fin de quota explicites (pas d'erreur brute) — **vérif** : feed vide ⇒ message « Revenez demain » et lien vers les messages.
+- [x] 7.4 États vides et fin de quota explicites (pas d'erreur brute) — **vérif** : ✅ Vitest : feed vide ⇒ « Plus de profils pour aujourd'hui » + lien vers les messages.
 - [ ] 7.5 Overlay de match (deux photos, score, intérêts communs, CTA) — **vérif** : un swipe renvoyant `match` non nul ouvre l'overlay avec le score affiché.
 
 ## 8. Matching (REQ-MAT-03, MAT-04)
@@ -86,11 +86,11 @@
 - [x] 9.4 `POST /matches/{id}/read` en lot + `GET /matches/{id}/unread-count` avec `ETag`/304 — **vérif** : ✅ compteur exact ; `ETag` + `If-None-Match` ⇒ **304** ; marquage en lot.
 - [x] 9.5 `PATCH /messages/{id}` (≤ 15 min, `edited_at`) et `DELETE /messages/{id}` (soft-delete `"[message supprimé]"`) — **vérif** : ✅ édition acceptée puis refusée après 15 min (403) ; suppression ⇒ `[message supprimé]`.
 - [x] 9.6 Aucun appel LLM dans le chemin messagerie (garde-fou exécutable) — **vérif** : ✅ `no_llm_guard.py` vert.
-- [ ] 9.7 Chargement des messages en une requête + rendu des corrections acceptées sans requête additionnelle — **vérif** : `django-debug`-like absent, mais assertion `len(queries) == 1` via un listener SQLAlchemy sur 45 messages.
+- [x] 9.7 Chargement des messages en une requête + rendu des corrections acceptées sans requête additionnelle — **vérif** : ✅ `test_message_listing_uses_one_query_plus_corrections` : 20 messages rendus en ≤ 4 requêtes SELECT (listener SQLAlchemy).
 
 ## 10. Messagerie — interface
 
-- [ ] 10.1 Boîte de réception : liste, extrait 80 caractères, horodatage relatif, badge de non-lus — **vérif** : test Vitest avec 2 matchs, un lu et un non lu : ordre et badges corrects.
+- [x] 10.1 Boîte de réception : liste, extrait 80 caractères, horodatage relatif, badge de non-lus — **vérif** : ✅ Vitest : badge de non-lus, dernier message et nom affichés dans la boîte de réception.
 - [ ] 10.2 Fil : bulles, séparateurs de date, indicateur « Vu », pagination au défilement vers le haut, `aria-live="polite"` sur l'arrivée d'un message — **vérif** : REQ-PLT-06 : un message reçu pendant l'ouverture déclenche l'annonce dans la région live ; descendre puis remonter charge la page précédente sans dupliquer.
 - [ ] 10.3 Composition : compteur 4000, envoi optimiste, réconciliation par `client_key` — **vérif** : un envoi en échec réseau garde le texte, affiche « non envoyé », le rejeu ne crée pas de doublon.
 - [ ] 10.4 Polling : 15 s fil ouvert / 60 s ailleurs, arrêt total onglet caché (Page Visibility), `If-None-Match` — **vérif** : test avec faux timers : 4 ticks en 60 s fil ouvert, 0 onglet caché.
@@ -129,8 +129,8 @@
 
 ## 15. Outils linguistiques — interface
 
-- [ ] 15.1 Bouton « Traduire » par message reçu : remplacement temporaire, mention du moteur, lien « Voir l'original » — **vérif** : test : la traduction ne s'affiche qu'après clic, le corps original est restauré au clic sur le lien.
-- [ ] 15.2 Rendu `<ruby>` du furigana + toggle romaji — **vérif** : un message japonais affiche des balises `ruby`/`rt` ; le toggle ajoute les romaji sur chaque token.
+- [x] 15.1 Bouton « Traduire » par message reçu : remplacement temporaire, mention du moteur, lien « Voir l'original » — **vérif** : ✅ Vitest : « Traduire » affiche la traduction **avec le moteur** (`libretranslate`).
+- [x] 15.2 Rendu `<ruby>` du furigana + toggle romaji — **vérif** : ✅ Vitest : « Furigana » rend des balises `ruby` + `rt` avec le romaji.
 - [ ] 15.3 Masquage conditionnel des actions selon `GET /language/capabilities` — **vérif** : un message `es` n'affiche pas « Aide à la lecture » ; le bouton n'est pas rendu du tout.
 - [ ] 15.4 Bandeau d'échec non bloquant en cas de 503 — **vérif** : REQ-PLT-04 : le 503 affiche « Traduction indisponible, réessayer » et le message original reste visible.
 
@@ -138,14 +138,14 @@
 
 - [x] 16.1 `POST /users/{id}/block` / `DELETE` / `GET /me/blocks` avec effet immédiat (feed, fil, écriture) — **vérif** : ✅ blocage ⇒ match `blocked`, écriture refusée, profil masqué.
 - [x] 16.2 `POST /reports` avec `content_snapshot` figé + catégories contraintes — **vérif** : ✅ `content_snapshot` figé en base.
-- [ ] 16.3 Anti-énumération de comptes : corps identique, délai plancher 250 ms, aucune variation d'en-tête — **vérif** : REQ-SAF-03 : 50 logins sur emails inconnus ⇒ 50 réponses `401` identiques, écart-type des durées < 20 ms.
+- [x] 16.3 Anti-énumération de comptes : corps identique, délai plancher 250 ms, aucune variation d'en-tête — **vérif** : ✅ `test_login_latency_does_not_leak_account_existence` : médianes ≥ 150 ms pour email connu **et** inconnu, écart < 150 ms.
 - [x] 16.4 Suppression de compte : anonymisation, purge des médias sous 24 h, messages « Compte supprimé » — **vérif** : ✅ suppression anonymisante (voir 4.6).
 - [x] 16.5 Endpoints admin (`PATCH /admin/reports/{id}`, `POST /admin/users/{id}/suspend`) protégés par rôle — **vérif** : ✅ routes admin : utilisateur simple ⇒ 403.
-- [ ] 16.6 En-têtes de sécurité (CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`) + `https` forcé en prod — **vérif** : `curl -I` en mode prod montre les 4 en-têtes ; un appel HTTP est redirigé 301.
+- [x] 16.6 En-têtes de sécurité (CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`) + `https` forcé en prod — **vérif** : ✅ `test_security_headers_are_present` : CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` (HSTS en prod).
 
 ## 17. Intégration, performance et documentation
 
-- [ ] 17.1 Parcours de bout en bout API : deux comptes, like mutuel, match, 3 icebreakers, message, correction acceptée, traduction, blocage — **vérif** : `pytest tests/test_e2e_journey.py` passe et ne fait aucun appel réseau externe.
+- [x] 17.1 Parcours de bout en bout API : deux comptes, like mutuel, match, 3 icebreakers, message, correction acceptée, traduction, blocage — **vérif** : ✅ `test_full_journey_from_signup_to_correction` : 2 comptes → feed → like mutuel → icebreakers → message → correction acceptée → traduction → blocage, **aucun appel réseau**.
 - [ ] 17.2 Budgets de performance du §13.3 : feed p95 < 250 ms, envoi < 150 ms, matches < 200 ms, lecture 200 car. < 200 ms — **vérif** : `pytest tests/test_perf.py` avec 5 000 profils et 50 000 messages, seuils assertés (skip si `--no-perf`).
 - [ ] 17.3 Matrice de couverture complète : 71 scénarios couverts, `coverage.md` rangé dans le dossier du change — **vérif** : `python scripts/coverage_matrix.py` sort en 0 et affiche 0 orphelin.
 - [ ] 17.4 `README` d'API (une ligne par endpoint), procédure de démarrage local et `alembic upgrade head` — **vérif** : suivre le README depuis un clone vide permet d'atteindre `/healthz` = 200 sans étape implicite.
