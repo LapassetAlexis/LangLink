@@ -24,8 +24,8 @@ dist/
 # Données locales
 *.db
 *.sqlite3
-uploads/
-media/
+/uploads/
+/media/
 
 # Éditeurs / OS
 .vscode/
