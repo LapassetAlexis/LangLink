@@ -253,7 +253,10 @@ describe('Fil de discussion', () => {
 
     renderChat()
 
-    await userEvent.click(await screen.findByText('À quel jeu joues-tu ?'))
+    // La question est affichée en texte ; c'est le bouton « Utiliser » qui l'insère.
+    expect(await screen.findByText('À quel jeu joues-tu ?')).toBeInTheDocument()
+    const [useFirst] = screen.getAllByRole('button', { name: 'Utiliser' })
+    await userEvent.click(useFirst)
 
     expect(screen.getByPlaceholderText('Écrire un message…')).toHaveValue('À quel jeu joues-tu ?')
   })

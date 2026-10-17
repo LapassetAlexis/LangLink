@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 
+import { SettingsPage } from '../features/SettingsPage'
 import { ChatPage, DiscoverPage, InboxPage, WizardPage } from '../features/pages'
 import { Flag } from '../components/Flag'
 import { api, getToken, setToken } from '../lib/api'
@@ -153,11 +154,18 @@ function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmation, setConfirmation] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
+  const mismatch = mode === 'signup' && confirmation.length > 0 && confirmation !== password
+
   async function submit(event: React.FormEvent) {
     event.preventDefault()
+    if (mode === 'signup' && confirmation !== password) {
+      setError('Les deux mots de passe ne correspondent pas.')
+      return
+    }
     setBusy(true)
     setError(null)
     try {
@@ -230,6 +238,26 @@ function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
               <span className="text-xs text-white/30">10 caractères minimum.</span>
             )}
           </label>
+          {mode === 'signup' && (
+            <label className="flex flex-col gap-1.5 text-sm text-white/60">
+              Confirmer le mot de passe
+              <input
+                className="field"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={10}
+                value={confirmation}
+                onChange={(event) => setConfirmation(event.target.value)}
+                aria-invalid={mismatch}
+              />
+              {mismatch && (
+                <span role="alert" className="text-xs text-red-300">
+                  Les deux saisies diffèrent.
+                </span>
+              )}
+            </label>
+          )}
 
           {error && (
             <p role="alert" className="rounded-2xl bg-red-500/10 px-4 py-3 text-sm text-red-300">
@@ -237,7 +265,11 @@ function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
             </p>
           )}
 
-          <button className="btn-primary mt-2 py-3.5" type="submit" disabled={busy}>
+          <button
+            className="btn-primary mt-2 py-3.5"
+            type="submit"
+            disabled={busy || mismatch || (mode === 'signup' && confirmation.length === 0)}
+          >
             {busy ? 'Un instant…' : mode === 'signup' ? 'Créer mon compte' : 'Entrer'}
           </button>
         </form>
@@ -253,9 +285,27 @@ function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
   )
 }
 
+function AccountMenu() {
+  return (
+    <nav className="fixed right-4 top-4 z-20 flex items-center gap-2">
+      <Link
+        to="/settings"
+        className="rounded-full border border-white/10 bg-[color:var(--ink-850)] px-4 py-2 text-xs text-white/70 transition hover:border-white/30 hover:text-white"
+      >
+        Mon compte
+      </Link>
+    </nav>
+  )
+}
+
 function Guard({ children }: { children: React.ReactNode }) {
   if (!getToken()) return <Navigate to="/login" replace />
-  return <>{children}</>
+  return (
+    <>
+      <AccountMenu />
+      {children}
+    </>
+  )
 }
 
 export function App() {
@@ -300,6 +350,14 @@ export function App() {
         element={
           <Guard>
             <InboxPage />
+          </Guard>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <Guard>
+            <SettingsPage />
           </Guard>
         }
       />

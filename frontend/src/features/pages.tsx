@@ -17,6 +17,26 @@ import { LANGUAGES } from '../lib/languages'
 
 const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 
+function relativeDate(iso: string | null): string {
+  if (!iso) return ''
+  const then = new Date(iso).getTime()
+  const minutes = Math.round((Date.now() - then) / 60000)
+  if (minutes < 1) return "à l'instant"
+  if (minutes < 60) return `il y a ${minutes} min`
+  const hours = Math.round(minutes / 60)
+  if (hours < 24) return `il y a ${hours} h`
+  const days = Math.round(hours / 24)
+  if (days === 1) return 'hier'
+  if (days < 7) return `il y a ${days} jours`
+  return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+}
+
+const STATUS_LABEL: Record<string, string> = {
+  active: '',
+  unmatched: 'conversation fermée',
+  blocked: 'profil bloqué',
+}
+
 function errorMessage(error: unknown): string {
   if (error instanceof ApiError) return error.problem.detail ?? error.problem.title
   return error instanceof Error ? error.message : 'Erreur inattendue'
@@ -394,11 +414,27 @@ export function InboxPage() {
                   {conversation.last_message ?? 'Nouveau match — dites bonjour'}
                 </span>
               </span>
-              {conversation.unread_count > 0 && (
-                <span className="rounded-full bg-brand-600 px-2 py-0.5 text-xs">
-                  {conversation.unread_count}
-                </span>
-              )}
+              <span className="flex shrink-0 flex-col items-end gap-1">
+                {conversation.last_message_at && (
+                  <time
+                    className="text-[11px] text-white/35"
+                    dateTime={conversation.last_message_at}
+                    title={new Date(conversation.last_message_at).toLocaleString('fr-FR')}
+                  >
+                    {relativeDate(conversation.last_message_at)}
+                  </time>
+                )}
+                {conversation.status !== 'active' && (
+                  <span className="text-[11px] text-amber-300/80">
+                    {STATUS_LABEL[conversation.status] ?? conversation.status}
+                  </span>
+                )}
+                {conversation.unread_count > 0 && conversation.status === 'active' && (
+                  <span className="rounded-full bg-brand-600 px-2 py-0.5 text-xs">
+                    {conversation.unread_count}
+                  </span>
+                )}
+              </span>
             </Link>
           </li>
         ))}
@@ -421,6 +457,8 @@ export function ChatPage() {
   const [translations, setTranslations] = useState<Record<string, string>>({})
   const [reading, setReading] = useState<Record<string, Array<{ surface: string; romaji: string }>>>({})
   const [pendingCorrection, setPendingCorrection] = useState<{ message: Message; start: number; end: number } | null>(null)
+  const [iceTranslations, setIceTranslations] = useState<Record<number, string>>({})
+  const [iceBusy, setIceBusy] = useState<number | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
 
   const mine = useMemo(() => messages, [messages])
@@ -535,16 +573,59 @@ export function ChatPage() {
         <aside className="mb-4 rounded-xl border border-slate-800 p-3">
           <p className="mb-2 text-xs uppercase tracking-wide text-slate-500">Brise-glace</p>
           <ul className="flex flex-col gap-2">
-            {detail.icebreakers.map((ice) => (
-              <li key={ice.position}>
-                <button
-                  className="text-left text-sm text-brand-300 hover:underline"
-                  onClick={() => setDraft((current) => (current ? `${current} ${ice.question_fr}` : ice.question_fr))}
-                >
-                  {ice.question_fr}
-                </button>
-              </li>
-            ))}
+            {detail.icebreakers.map((ice) => {
+              const translated = iceTranslations[ice.position]
+              const shown = translated ?? ice.question_fr
+              return (
+                <li key={ice.position} className="flex flex-col gap-1">
+                  <span className="text-sm text-white/80">{shown}</span>
+                  <span className="flex gap-3 text-[11px] text-white/35">
+                    <button
+                      className="hover:text-white/70"
+                      onClick={() =>
+                        setDraft((current) => (current ? `${current} ${shown}` : shown))
+                      }
+                    >
+                      Utiliser
+                    </button>
+                    {detail.other?.native_language && (
+                      <button
+                        className="hover:text-white/70 disabled:opacity-40"
+                        disabled={iceBusy === ice.position}
+                        onClick={async () => {
+                          if (translated) {
+                            setIceTranslations((current) => {
+                              const next = { ...current }
+                              delete next[ice.position]
+                              return next
+                            })
+                            return
+                          }
+                          setIceBusy(ice.position)
+                          try {
+                            const result = await api.translateText(
+                              ice.question_fr,
+                              'fr',
+                              detail.other?.native_language ?? 'en',
+                            )
+                            setIceTranslations((current) => ({
+                              ...current,
+                              [ice.position]: result.translated,
+                            }))
+                          } catch {
+                            setError('Traduction indisponible pour cette question.')
+                          } finally {
+                            setIceBusy(null)
+                          }
+                        }}
+                      >
+                        {translated ? 'voir en français' : 'voir en langue du correspondant'}
+                      </button>
+                    )}
+                  </span>
+                </li>
+              )
+            })}
           </ul>
         </aside>
       )}

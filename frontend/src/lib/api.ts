@@ -140,6 +140,18 @@ export interface Message {
   corrections: Correction[]
 }
 
+export interface ProfileOut {
+  user_id: string
+  display_name: string
+  bio: string | null
+  birth_year: number | null
+  avatar_key: string | null
+  native_language: string | null
+  target_language: string | null
+  target_level: string | null
+  discoverable: boolean
+}
+
 export interface ReadingToken {
   surface: string
   reading: string
@@ -287,6 +299,30 @@ export const api = {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify({ message_id: messageId, lang: 'ja' }),
+    }),
+
+  translateText: (text: string, source_lang: string, target_lang: string) =>
+    apiFetch<{ translated: string; provider: string; cached: boolean }>('/language/translate', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ text, source_lang, target_lang }),
+    }),
+
+  profile: () => apiFetch<ProfileOut>('/me/profile', { headers: authHeaders() }),
+
+  blocks: () =>
+    apiFetch<{ items: Array<{ blocked_id: string; display_name: string }> }>('/me/blocks', {
+      headers: authHeaders(),
+    }),
+
+  logout: () =>
+    apiFetch<void>('/auth/logout', { method: 'POST', headers: authHeaders() }),
+
+  deleteAccount: (password: string) =>
+    apiFetch<void>('/me', {
+      method: 'DELETE',
+      headers: authHeaders(),
+      body: JSON.stringify({ password }),
     }),
 
   block: (userId: string) =>

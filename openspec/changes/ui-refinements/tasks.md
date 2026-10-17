@@ -1,0 +1,33 @@
+# Tasks — ui-refinements
+
+## 1. Identité : double saisie du mot de passe
+
+- [ ] 1.1 Ajouter un champ « Confirmer le mot de passe » à l'inscription, avec contrôle de concordance côté client — **vérif** : test Vitest, saisies différentes ⇒ requête non envoyée et message affiché ; identiques ⇒ un seul appel.
+
+## 2. Liste des conversations : date et statut
+
+- [ ] 2.1 Afficher la date relative du dernier message (`il y a 5 min`, `hier`, date courte au-delà de 7 jours), horodatage absolu en `title` — **vérif** : test Vitest sur 3 dates (5 min, hier, il y a 2 mois).
+- [ ] 2.2 Afficher le statut du fil (`active` / `unmatched` / `blocked`) et masquer le compteur de non-lus si le fil est fermé — **vérif** : test Vitest avec un fil `blocked` ⇒ badge absent, libellé « conversation fermée ».
+
+## 3. Compte et réglages
+
+- [ ] 3.1 Menu de compte dans l'en-tête des vues authentifiées (initiale, lien Réglages, Déconnexion) — **vérif** : test Vitest, clic sur Déconnexion ⇒ `setToken(null)` appelé et retour à `/`.
+- [ ] 3.2 Route `/settings` avec 5 blocs : profil, langues, intérêts, blocages, suppression de compte — **vérif** : formulaire prérempli depuis `GET /me/profile`, enregistrement appelle l'endpoint correspondant.
+- [ ] 3.3 Suppression de compte depuis les réglages, avec confirmation par mot de passe — **vérif** : test, mot de passe erroné ⇒ 422 affiché, compte intact.
+
+## 4. Icebreakers dans la langue du correspondant
+
+- [x] 4.1 Étendre `api` avec `translateText(text, source, target)` — **vérif** : typecheck + test unitaire du client (URL et corps de requête). — **vérif** : ✅ `translateText` ajouté au client, `tsc` vert.
+- [ ] 4.2 Afficher la question dans `other.native_language`, avec bascule « voir en français » et cache en mémoire — **vérif** : test Vitest, bascule affiche la version traduite ; second clic ne refait pas d'appel.
+- [ ] 4.3 Repli non bloquant si la traduction échoue — **vérif** : test, provider en erreur ⇒ question d'origine + mention, aucune exception.
+
+## 5. Aide au mot (mode « mot à mot »)
+
+- [ ] 5.1 Bouton « mot à mot » par message reçu : segmentation par espaces pour les écritures latines, par tokens pour le japonais — **vérif** : test, un message japonais produit des tokens alignés sur les offsets de l'API.
+- [ ] 5.2 Panneau d'aide au clic : sens (via `/language/translate`), lecture + romaji pour le japonais, mention explicite « traduction automatique, sens unique » — **vérif** : test Vitest, clic sur un mot affiche le panneau avec la mention.
+- [ ] 5.3 Trancher la source lexicale multi-sens (W3 du design D-4) et documenter la décision dans `design.md` — **vérif** : décision consignée, ou dette assumée écrite noir sur blanc.
+
+## 6. Clôture
+
+- [x] 6.1 `tsc`, `eslint`, `vitest`, `npm run build` verts — **vérif** : quatre commandes en code 0. — **vérif** : ✅ `tsc`, `eslint`, `vitest` (11 tests) et `npm run build` en code 0.
+- [x] 6.2 `openspec validate --all --strict` — **vérif** : 0 échec. — **vérif** : ✅ `openspec validate --all --strict` : 3 changes, 0 échec.
