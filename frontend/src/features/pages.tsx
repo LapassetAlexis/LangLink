@@ -12,21 +12,10 @@ import {
   type OnboardingState,
 } from '../lib/api'
 
+import { LanguagePair } from '../components/LanguagePair'
+import { LANGUAGES } from '../lib/languages'
+
 const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
-const LANGUAGES: Array<[string, string]> = [
-  ['fr', 'Français'],
-  ['en', 'Anglais'],
-  ['es', 'Espagnol'],
-  ['de', 'Allemand'],
-  ['it', 'Italien'],
-  ['pt', 'Portugais'],
-  ['ja', 'Japonais'],
-  ['ko', 'Coréen'],
-  ['ar', 'Arabe'],
-  ['ru', 'Russe'],
-  ['tr', 'Turc'],
-  ['nl', 'Néerlandais'],
-]
 
 function errorMessage(error: unknown): string {
   if (error instanceof ApiError) return error.problem.detail ?? error.problem.title
@@ -134,9 +123,9 @@ export function WizardPage() {
                 value={native}
                 onChange={(event) => setNative(event.target.value)}
               >
-                {LANGUAGES.map(([code, label]) => (
-                  <option key={code} value={code}>
-                    {label}
+                {LANGUAGES.map((language) => (
+                  <option key={language.code} value={language.code}>
+                    {language.flag} {language.label}
                   </option>
                 ))}
               </select>
@@ -148,9 +137,9 @@ export function WizardPage() {
                 value={target}
                 onChange={(event) => setTarget(event.target.value)}
               >
-                {LANGUAGES.map(([code, label]) => (
-                  <option key={code} value={code}>
-                    {label}
+                {LANGUAGES.map((language) => (
+                  <option key={language.code} value={language.code}>
+                    {language.flag} {language.label}
                   </option>
                 ))}
               </select>
@@ -322,7 +311,12 @@ export function DiscoverPage() {
           <div>
             <h1 className="display text-3xl">{current.display_name}</h1>
             <p className="mt-1.5 text-sm text-white/45">
-              {current.native_language} → {current.target_language} · niveau {current.target_level}
+              <LanguagePair
+                native={current.native_language}
+                target={current.target_language}
+                className="text-white/70"
+              />{' '}
+              · niveau {current.target_level}
             </p>
           </div>
           <span
@@ -395,7 +389,7 @@ export function InboxPage() {
             >
               <span>
                 <span className="font-medium">{conversation.display_name}</span>
-                <span className="ml-2 text-xs text-slate-500">{conversation.languages}</span>
+                <span className="ml-2 text-xs text-white/45"><LanguagePair pair={conversation.languages} /></span>
                 <span className="block text-sm text-slate-400">
                   {conversation.last_message ?? 'Nouveau match — dites bonjour'}
                 </span>
@@ -525,8 +519,11 @@ export function ChatPage() {
         <div>
           <h1 className="text-lg font-semibold">{detail.other?.display_name}</h1>
           <p className="text-xs text-slate-500">
-            {detail.other?.native_language} → {detail.other?.target_language} · affinité{' '}
-            {detail.affinity_score}/100
+            <LanguagePair
+              native={detail.other?.native_language}
+              target={detail.other?.target_language}
+            />{' '}
+            · affinité {detail.affinity_score}/100
           </p>
         </div>
         <Link className="text-sm text-slate-400 underline" to="/messages">

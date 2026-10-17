@@ -97,7 +97,7 @@ function Landing() {
             <div className="flex items-start justify-between">
               <div>
                 <p className="display text-2xl">Yuki</p>
-                <p className="mt-1 text-xs text-white/45">japonais → français · A2</p>
+                <p className="mt-1 text-xs text-white/45">🇯🇵 japonais → 🇫🇷 français · A2</p>
               </div>
               <span
                 className="grid h-12 w-12 place-items-center rounded-full text-sm font-semibold"

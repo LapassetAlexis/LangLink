@@ -102,3 +102,23 @@ sans apparition de défilement horizontal.
 - **THEN** les pages à deux colonnes (accueil, authentification) affichent leurs deux
   colonnes
 - **AND** la largeur de lecture reste bornée pour ne pas étirer les lignes de texte
+
+### Requirement: [REQ-UIX-07] Langues identifiées par un drapeau et un libellé
+
+Le système SHALL afficher toute langue avec un drapeau et son libellé en toutes lettres, et
+aucun écran SHALL présenter un code BCP-47 brut (`ja`, `fr`) à l'utilisateur.
+
+#### Scenario: Paire de langues sur une carte de profil
+- **WHEN** un profil japonais apprend le français
+- **THEN** l'interface affiche `🇯🇵 japonais → 🇫🇷 français`
+- **AND** le texte accessible annonce « Japonais vers Français »
+
+#### Scenario: Lecture par un lecteur d'écran
+- **WHEN** un lecteur d'écran parcourt une paire de langues
+- **THEN** il énonce les noms des langues, jamais le nom des emoji
+- **AND** les drapeaux sont marqués `aria-hidden`
+
+#### Scenario: Système sans rendu des emoji
+- **WHEN** la plateforme n'affiche pas les indicatifs régionaux (Windows)
+- **THEN** le libellé en toutes lettres reste lisible et suffit à comprendre
+- **AND** aucune information n'est portée par le seul drapeau
