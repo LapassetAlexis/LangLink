@@ -7,6 +7,7 @@ import uuid
 from app.api.deps import CurrentUser, SessionDep
 from app.core.errors import NotFound, Unprocessable
 from app.services import language as language_service
+from app.services import lexicon as lexicon_service
 from app.services.messaging import membership
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
@@ -86,6 +87,41 @@ async def translate(payload: TranslateIn, user: CurrentUser, session: SessionDep
 async def reading_aid(payload: ReadingAidIn, user: CurrentUser, session: SessionDep) -> dict[str, object]:
     body, _, _ = await _resolve_text(session, user.id, payload.text, payload.message_id)
     return await language_service.reading_aid(session, body, payload.lang)
+
+
+class LexiconIn(BaseModel):
+    text: str = Field(min_length=1, max_length=64)
+    lang: str = Field(default="fr", max_length=16)
+
+
+@router.post("/lexicon", summary="Sens possibles d'un mot (Wiktionnaire)")
+async def lexicon(payload: LexiconIn, user: CurrentUser, session: SessionDep) -> dict[str, object]:
+    """Aide au mot : plusieurs sens, avec catégorie grammaticale.
+
+    Pour le japonais, la lecture kana et le romaji sont ajoutés via le tokenizer local —
+    aucune information supplémentaire n'est demandée à la source.
+    """
+    word = payload.text.strip()
+    senses = await lexicon_service.lookup(word)
+
+    reading = None
+    if payload.lang == "ja":
+        try:
+            tokens = language_service.annotate_japanese(word)
+            reading = {
+                "kana": "".join(token["reading"] for token in tokens),
+                "romaji": "".join(token["romaji"] for token in tokens),
+            }
+        except Exception:  # noqa: BLE001 - l'annotation ne doit pas bloquer l'aide
+            reading = None
+
+    return {
+        "word": word,
+        "lang": payload.lang,
+        "senses": senses,
+        "source": "wiktionnaire" if senses else "aucune",
+        "reading": reading,
+    }
 
 
 @router.get("/capabilities", summary="Langues supportées par chaque outil")
