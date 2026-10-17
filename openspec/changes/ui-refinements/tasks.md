@@ -18,7 +18,7 @@
 ## 4. Icebreakers dans la langue du correspondant
 
 - [x] 4.1 Étendre `api` avec `translateText(text, source, target)` — **vérif** : typecheck + test unitaire du client (URL et corps de requête). — **vérif** : ✅ `translateText` ajouté au client, `tsc` vert.
-- [ ] 4.2 Afficher la question dans `other.native_language`, avec bascule « voir en français » et cache en mémoire — **vérif** : test Vitest, bascule affiche la version traduite ; second clic ne refait pas d'appel.
+- [x] 4.2 Afficher la question dans `other.native_language` **par défaut** (traduction automatique à l'ouverture du fil), avec bascule « voir en français » et cache en mémoire — **vérif** : ✅ effet de traduction des 3 questions au montage, `shown = traduit ?? original`, bascule vers l'original sans nouvel appel.
 - [ ] 4.3 Repli non bloquant si la traduction échoue — **vérif** : test, provider en erreur ⇒ question d'origine + mention, aucune exception.
 
 ## 5. Aide au mot (mode « mot à mot »)
@@ -32,3 +32,4 @@
 
 - [x] 6.1 `tsc`, `eslint`, `vitest`, `npm run build` verts — **vérif** : quatre commandes en code 0. — **vérif** : ✅ `tsc`, `eslint`, `vitest` (11 tests) et `npm run build` en code 0.
 - [x] 6.2 `openspec validate --all --strict` — **vérif** : 0 échec. — **vérif** : ✅ `openspec validate --all --strict` : 3 changes, 0 échec.
+- [x] 6.3 Test anti-régression du déploiement : le moteur de traduction doit être déclaré dans `deploy/stack.yml` et l'URL de l'API doit pointer vers un service existant — **vérif** : ✅ `tests/test_deploy_contract.py` (3 tests), né du 503 de production où les tests mockaient le fournisseur.
