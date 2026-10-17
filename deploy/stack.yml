@@ -1,0 +1,71 @@
+# Déploiement « une seule stack » : base + API + web.
+#
+# Utilisé par Portainer (stack `langlink` sur le Beelink). Les valeurs sensibles ne sont
+# PAS dans ce fichier : elles sont fournies par les variables d'environnement de la stack
+# (Portainer `Env`), ce qui évite de versionner un secret.
+#
+# Build : les contextes pointent vers le dépôt présent sur l'hôte Docker
+# (`/home/tristabeau/Docker/hermes/workspace/LangLink`), ce qui permet d'itérer sans
+# pousser sur GitHub. Bascule vers une stack « Git repository » quand le code sera publié.
+
+name: langlink
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      # Exposé sur le LAN uniquement : nécessaire pour lancer les tests Alembic/pytest
+      # depuis le conteneur de l'agent. À retirer en production.
+      - "${DB_BIND}:${DB_PORT}:5432"
+    volumes:
+      - langlink_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  api:
+    build:
+      context: ${REPO_PATH}/backend
+    restart: unless-stopped
+    environment:
+      ENV: ${APP_ENV}
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL}
+      CORS_ORIGINS: ${PUBLIC_BASE_URL}
+      MEDIA_ROOT: /data/uploads
+    volumes:
+      - langlink_media:/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${API_PORT}:8000"
+    healthcheck:
+      test:
+        ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  web:
+    build:
+      context: ${REPO_PATH}/frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "${WEB_PORT}:80"
+
+volumes:
+  langlink_pgdata:
+  langlink_media:
