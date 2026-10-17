@@ -317,28 +317,41 @@ export function DiscoverPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-4 px-6 py-10">
-      <article className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
-        <h1 className="text-2xl font-semibold">{current.display_name}</h1>
-        <p className="text-sm text-slate-400">
-          {current.native_language} → {current.target_language} · {current.target_level} · affinité{' '}
-          {current.score}/100
-        </p>
-        {current.bio && <p className="text-slate-300">{current.bio}</p>}
-        <p className="text-xs text-slate-500">
-          {current.common_interest_ids.length} centre(s) d&apos;intérêt en commun
-        </p>
+      <article className="surface flex flex-col gap-4 p-7">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="display text-3xl">{current.display_name}</h1>
+            <p className="mt-1.5 text-sm text-white/45">
+              {current.native_language} → {current.target_language} · niveau {current.target_level}
+            </p>
+          </div>
+          <span
+            className="grid h-14 w-14 shrink-0 place-items-center rounded-full"
+            style={{
+              background: `conic-gradient(var(--amber-400) ${current.score}%, rgba(255,255,255,0.07) 0)`,
+            }}
+            aria-label={`Affinité ${current.score} sur 100`}
+          >
+            <span className="grid h-11 w-11 place-items-center rounded-full bg-[color:var(--ink-900)] text-sm font-semibold">
+              {current.score}
+            </span>
+          </span>
+        </div>
+        {current.bio && <p className="text-sm leading-relaxed text-white/65">{current.bio}</p>}
+        <div className="flex flex-wrap gap-2 pt-1">
+          <span className="chip-on text-xs">
+            {current.common_interest_ids.length} intérêts en commun
+          </span>
+          {current.birth_year && (
+            <span className="chip text-xs">{new Date().getFullYear() - current.birth_year} ans</span>
+          )}
+        </div>
       </article>
       <div className="flex gap-3">
-        <button
-          className="flex-1 rounded-lg border border-slate-700 px-5 py-3"
-          onClick={() => void decide('pass')}
-        >
+        <button className="btn-ghost flex-1 py-3.5" onClick={() => void decide('pass')}>
           Passer
         </button>
-        <button
-          className="flex-1 rounded-lg bg-brand-600 px-5 py-3 font-medium"
-          onClick={() => void decide('like')}
-        >
+        <button className="btn-primary flex-1 py-3.5" onClick={() => void decide('like')}>
           J&apos;aime
         </button>
       </div>
@@ -377,7 +390,7 @@ export function InboxPage() {
         {items.map((conversation) => (
           <li key={conversation.id}>
             <Link
-              className="flex items-center justify-between rounded-xl border border-slate-800 px-4 py-3 hover:border-slate-600"
+              className="flex items-center justify-between rounded-2xl border border-white/5 bg-white/[0.02] px-5 py-4 transition hover:border-white/20 hover:bg-white/[0.04]"
               to={`/messages/${conversation.id}`}
             >
               <span>
@@ -545,7 +558,7 @@ export function ChatPage() {
             key={message.id}
             data-message-id={message.id}
             onMouseUp={() => startCorrection(message)}
-            className="rounded-xl border border-slate-800 bg-slate-900/50 p-3"
+            className="bubble-them rise"
           >
             <p className="whitespace-pre-wrap text-slate-100">
               {reading[message.id]
@@ -641,13 +654,13 @@ export function ChatPage() {
         }}
       >
         <input
-          className="flex-1 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
+          className="field flex-1"
           placeholder="Écrire un message…"
           maxLength={4000}
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
         />
-        <button className="rounded-lg bg-brand-600 px-4 py-2 font-medium" type="submit">
+        <button className="btn-primary px-5" type="submit">
           Envoyer
         </button>
       </form>

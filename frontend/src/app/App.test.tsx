@@ -15,6 +15,6 @@ describe('App', () => {
     expect(
       screen.getByRole('heading', { name: /échangez avec des personnes/i }),
     ).toBeInTheDocument()
-    expect(screen.getByText(/correspondance asynchrone/i)).toBeInTheDocument()
+    expect(screen.getByText(/deux humains qui s'apprennent mutuellement/i)).toBeInTheDocument()
   })
 })

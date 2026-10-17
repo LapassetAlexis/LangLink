@@ -2,23 +2,141 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ------------------------------------------------------------------ tokens */
 :root {
+  --ink-950: #080a0f;
+  --ink-900: #0b0e14;
+  --ink-850: #10141c;
+  --ink-800: #161b25;
+  --ink-700: #222834;
+  --sand-100: #f6efe3;
+  --sand-300: #e6d5b8;
+  --amber-400: #f0b357;
+  --amber-500: #e09b3d;
+  --teal-400: #6fd3c0;
+  --rose-400: #e88c7d;
   color-scheme: dark;
 }
 
 html,
-body {
-  height: 100%;
+body,
+#root {
+  min-height: 100%;
 }
 
 body {
   margin: 0;
+  background-color: var(--ink-900);
+  color: var(--sand-100);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-/* Focus visible homogène : exigence d'accessibilité (REQ-PLT-05/06). */
+/* Halos colorés très diffus : donnent de la profondeur sans images. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -20% -10% auto -10%;
+  height: 70vh;
+  background:
+    radial-gradient(45% 55% at 20% 20%, rgba(240, 179, 87, 0.16), transparent 70%),
+    radial-gradient(40% 50% at 78% 12%, rgba(111, 211, 192, 0.12), transparent 70%),
+    radial-gradient(50% 45% at 55% 0%, rgba(232, 140, 125, 0.1), transparent 75%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+/* -------------------------------------------------------------- primitives */
+@layer components {
+  .display {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  .surface {
+    @apply rounded-3xl border border-white/5 bg-[color:var(--ink-850)] backdrop-blur-sm;
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.04) inset,
+      0 24px 60px -30px rgba(0, 0, 0, 0.9);
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 text-[color:var(--ink-950)];
+    background: linear-gradient(180deg, var(--amber-400), var(--amber-500));
+    box-shadow: 0 10px 30px -12px rgba(240, 179, 87, 0.7);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 36px -14px rgba(240, 179, 87, 0.85);
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 border border-white/10 text-[color:var(--sand-300)] hover:border-white/25;
+  }
+
+  .field {
+    @apply w-full rounded-2xl border border-white/10 bg-[color:var(--ink-950)] px-4 py-3
+      text-[color:var(--sand-100)] outline-none transition
+      placeholder:text-white/25 focus:border-[color:var(--amber-400)];
+  }
+
+  .chip {
+    @apply rounded-full border px-3.5 py-1.5 text-sm transition
+      border-white/10 text-white/70 hover:border-white/25 hover:text-white;
+  }
+
+  .chip-on {
+    @apply rounded-full px-3.5 py-1.5 text-sm transition;
+    border: 1px solid rgba(240, 179, 87, 0.55);
+    background: rgba(240, 179, 87, 0.14);
+    color: var(--sand-100);
+  }
+
+  .eyebrow {
+    @apply text-[11px] font-medium uppercase tracking-[0.22em] text-[color:var(--amber-400)];
+  }
+
+  .bubble-them {
+    @apply max-w-[85%] rounded-3xl rounded-bl-md border border-white/5 px-4 py-3;
+    background: var(--ink-800);
+  }
+}
+
 :focus-visible {
-  outline: 2px solid theme('colors.brand.400');
-  outline-offset: 2px;
+  outline: 2px solid var(--amber-400);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: riseIn 0.35s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
 }
