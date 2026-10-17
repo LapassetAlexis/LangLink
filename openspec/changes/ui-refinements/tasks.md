@@ -25,7 +25,8 @@
 
 - [ ] 5.1 Bouton « mot à mot » par message reçu : segmentation par espaces pour les écritures latines, par tokens pour le japonais — **vérif** : test, un message japonais produit des tokens alignés sur les offsets de l'API.
 - [ ] 5.2 Panneau d'aide au clic : sens (via `/language/translate`), lecture + romaji pour le japonais, mention explicite « traduction automatique, sens unique » — **vérif** : test Vitest, clic sur un mot affiche le panneau avec la mention.
-- [ ] 5.3 Trancher la source lexicale multi-sens (W3 du design D-4) et documenter la décision dans `design.md` — **vérif** : décision consignée, ou dette assumée écrite noir sur blanc.
+- [ ] 5.3 Backend : `POST /language/lexicon` — récupérer le wikitext via `action=parse`, extraire les lignes `#`, nettoyer les liens `[[…]]`, renvoyer `{part_of_speech, definition}[]` + lecture/romaji si `ja` — **vérif** : test « marché » ⇒ ≥ 2 sens avec catégorie ; « 学生 » ⇒ sens + reading.
+- [x] 5.4 Trancher la source lexicale multi-sens (design D-4) — **vérif** : ✅ REST du Wiktionnaire hors service (`501`), `action=parse` + wikitext `#` retenu, vérifié sur « marché » et « 学生 ».
 
 ## 6. Clôture
 

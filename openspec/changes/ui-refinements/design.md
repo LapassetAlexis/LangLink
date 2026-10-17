@@ -53,9 +53,33 @@ Trois voies, à trancher :
 | **B. Wiktionnaire (API REST)** | plusieurs sens + nature grammaticale | moyen, dépendance réseau externe |
 | **C. JMdict / dictionnaire local** | plusieurs sens, hors ligne, fiable pour le japonais | lourd (dictionnaire ~50 Mo) |
 
-Le présent change **spécifie** l'exigence (REQ-LEX-02 : plusieurs sens) et **implémente la
-voie A** comme repli assumé, en attendant l'arbitrage. L'interface annonce clairement
-« traduction automatique, sens unique » pour ne pas mentir sur la nature de l'aide.
+#### Arbitrage tranché (vérifié le 17/10/2026)
+
+La voie B est retenue, mais **pas par l'API REST du Wiktionnaire** : elle est hors service et
+renvoie `{"status":501}` sur tous les mots, y compris « hello ». La source fiable est
+l'**API MediaWiki** :
+
+```
+GET https://fr.wiktionary.org/w/api.php?action=parse&page=<mot>&prop=wikitext&format=json&formatversion=2
+```
+
+Le wikitext contient les définitions sous forme de lignes commençant par `#` (et non `##`),
+avec la catégorie grammaticale en tête : `# (Commerce) Lieu public où s'achètent…`. C'est
+nettement plus robuste que de parser le HTML (`prop=text` renvoie 348 `<li>` pour « marché »,
+dont les citations et exemples).
+
+Vérifié sur les deux cas qui nous intéressent :
+
+| Mot | Première définition extraite |
+|---|---|
+| `marché` | `(Commerce) Lieu public où s'achètent et se vendent les denrées…` |
+| `学生` | `(Éducation) Élève, étudiant, étudiante.` |
+
+Conséquences : couvre **toutes** les paires de langues (le Wiktionnaire français décrit les
+mots japonais), aucune clé d'API, mais dépendance réseau et wikitext à nettoyer. Le repli
+reste la traduction automatique (voie A) avec la mention « sens unique » si le Wiktionnaire
+ne trouve rien. La voie C (JMdict local) reste écartée : 50 Mo pour un seul couple de
+langues, alors que la voie B couvre tout sans stockage.
 
 ### D-5 — Menu de compte dans l'en-tête, route `/settings`
 
