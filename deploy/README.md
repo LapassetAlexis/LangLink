@@ -23,7 +23,19 @@ avec `unable to prepare context: path ... not found`, même quand le chemin exis
 l'hôte (vérifié). Seule une stack **depuis un dépôt Git** fonctionne : Portainer clone le
 dépôt et résout les contextes relativement à ce clone.
 
-### Procédure
+### Procédure de redéploiement
+
+```bash
+python scripts/deploy_stack.py      # supprime puis recrée la stack depuis Git, Env complet
+```
+
+⚠️ **Ne pas utiliser `PUT /api/stacks/{id}/git/redeploy`** (Portainer 2.33.3) : cet appel
+**vide `Env` et `ReferenceName`**. Les conteneurs démarrent alors avec des variables vides et
+l'API refuse de démarrer (`DATABASE_URL doit etre un DSN PostgreSQL`, `JWT_SECRET ...`).
+Diagnostiqué dans les logs du conteneur. La recréation complète est la seule voie fiable ;
+le volume `langlink_pgdata` a un nom explicite et survit à la suppression de la stack.
+
+### Création initiale
 
 1. Pousser le dépôt sur GitHub (`main`).
 2. Dans Portainer : **Stacks → Add stack → Repository**
@@ -34,7 +46,6 @@ dépôt et résout les contextes relativement à ce clone.
 
 | Variable | Exemple |
 |---|---|
-| `REPO_PATH` | `.` (racine du clone) |
 | `POSTGRES_DB` | `langlink` |
 | `POSTGRES_USER` | `langlink` |
 | `POSTGRES_PASSWORD` | *(généré)* |
