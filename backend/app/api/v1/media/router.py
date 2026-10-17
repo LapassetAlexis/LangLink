@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter
-from fastapi.responses import FileResponse
-
 from app.core.errors import NotFound
 from app.services import media as media_service
+from fastapi import APIRouter
+from fastapi.responses import FileResponse
 
 router = APIRouter(tags=["media"])
 
