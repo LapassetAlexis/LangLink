@@ -285,13 +285,15 @@ CREATE TABLE messages (
     id         uuid PRIMARY KEY,
     match_id   uuid NOT NULL REFERENCES matches(id) ON DELETE CASCADE,
     sender_id  uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    body       text NOT NULL CHECK (char_length(body) BETWEEN 1 AND 4000),
-    body_lang  text,                               -- langue déclarée, sinon inférée de la langue visée
-    created_at timestamptz NOT NULL DEFAULT now(),
-    edited_at  timestamptz,
-    deleted_at timestamptz
+    body        text NOT NULL CHECK (char_length(body) BETWEEN 1 AND 4000),
+    body_lang   text,                              -- langue déclarée, sinon inférée de la langue visée
+    client_key  text,                              -- Idempotency-Key du client (anti-doublon d'envoi)
+    created_at  timestamptz NOT NULL DEFAULT now(),
+    edited_at   timestamptz,
+    deleted_at  timestamptz,
+    UNIQUE (match_id, sender_id, client_key)
 );
-CREATE INDEX idx_messages_match_created ON messages(match_id, created_at DESC);
+CREATE INDEX idx_messages_match_created ON messages(match_id, created_at DESC, id DESC);
 
 CREATE TABLE message_reads (
     message_id uuid NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
@@ -720,7 +722,7 @@ décision définitive.
 | `POST` | `/language/reading-aid` | JWT | `{message_id}` ou `{text, lang}` → 200 |
 | `GET` | `/language/capabilities` | JWT | Langues traduisibles + langues avec aide à la lecture |
 
-##### Requirement: Traduction à la demande
+#### Requirement: [REQ-LNG-01] Traduction à la demande
 Le système SHALL ne traduire qu'à la demande explicite, mettre en cache le résultat et ne
 jamais envoyer de trafic utilisateur à un service tiers sans action de l'utilisateur.
 
@@ -739,7 +741,7 @@ jamais envoyer de trafic utilisateur à un service tiers sans action de l'utilis
 - **WHEN** la paire demandée n'est pas dans `capabilities`
 - **THEN** l'API renvoie `422 language.unsupported` et l'UI masque l'action
 
-#### Requirement: [REQ-LNG-01] Aide à la lecture déterministe
+#### Requirement: [REQ-LNG-02] Aide à la lecture déterministe
 Le système SHALL produire, pour le japonais, une annotation tokenisée `{surface, reading,
 romaji, start, end}` via un tokenizer et un dictionnaire locaux, sans appel réseau.
 
@@ -1030,7 +1032,7 @@ discussion.
 | Cache | `reading_aids`, clé SHA-256 du texte + `lang` + `engine` |
 | Portée | japonais en V1 ; chinois (pinyin) et coréen (romanisation) en V2 |
 
-#### Requirement: [REQ-LNG-02] Aucune dépendance réseau pour l'aide à la lecture
+#### Requirement: [REQ-LNG-03] Aucune dépendance réseau pour l'aide à la lecture
 Le système SHALL exécuter la tokenisation localement, y compris hors connexion Internet.
 
 ##### Scenario: Serveur sans accès externe
@@ -1038,7 +1040,7 @@ Le système SHALL exécuter la tokenisation localement, y compris hors connexion
 - **THEN** `POST /language/reading-aid` répond `200` avec les annotations
 - **AND** aucune requête sortante n'est émise
 
-#### Requirement: [REQ-LNG-03] Exactitude des offsets
+#### Requirement: [REQ-LNG-04] Exactitude des offsets
 Le système SHALL garantir que la concaténation des `surface` reconstitue le texte d'entrée
 à l'octet près (UTF-8).
 
@@ -1313,11 +1315,11 @@ Découpage cible de `openspec/specs/` (matérialisé par le change `mvp-v1`) :
 | `messaging` | REQ-MSG-01…06 | `/matches/{id}/messages`, `/read`, `/messages/{id}` |
 | `icebreakers` | REQ-ICE-01 | inclus dans `/matches/{id}` |
 | `corrections` | REQ-COR-01…03 | `/messages/{id}/corrections`, `/corrections/{id}/*` |
-| `language-tools` | REQ-LNG-01…03 | `/language/*` |
+| `language-tools` | REQ-LNG-01…04 | `/language/*` |
 | `safety` | REQ-SAF-01…04 | `/users/{id}/block`, `/reports`, `/admin/*` |
 | `platform` | REQ-PLT-01…07 | `/healthz`, `/readyz`, OpenAPI, CI |
 
-**Total : 43 exigences, 71 scénarios** (vérifiable par
+**Total : 44 exigences, 71 scénarios** (vérifiable par
 `grep -c '^#### Requirement:' openspec/specs/core.spec.md`).
 
 Ordre de livraison recommandé (dépendances) :

@@ -12,10 +12,22 @@ sans IA générative dans la conversation.
 
 | Étape | Statut |
 |---|---|
-| 1. Spécification maître (`openspec/specs/core.spec.md`) | ✅ rédigée, **en attente de validation** |
-| 2. Validation des specs | ⏳ en cours |
-| 3. Initialisation backend + frontend | ⏸ bloquée par l'étape 2 |
-| 4. Implémentation par change OpenSpec | ⏸ |
+| 1. Spécification maître (`openspec/specs/core.spec.md`) | ✅ validée (Option A) |
+| 2. Planification OpenSpec du change `mvp-v1` | ✅ 4/4 artefacts, `openspec validate --strict` vert |
+| 3. Initialisation backend + frontend | ⏳ lot 1 de `tasks.md` (96 tâches) |
+| 4. Implémentation par lots | ⏸ non démarrée |
+
+### Le change `mvp-v1`
+
+| Artefact | Contenu |
+|---|---|
+| `openspec/changes/mvp-v1/proposal.md` | Pourquoi, périmètre, 10 capacités, impact |
+| `openspec/changes/mvp-v1/specs/*/spec.md` | 10 deltas natifs : **44 exigences, 71 scénarios** |
+| `openspec/changes/mvp-v1/design.md` | 15 décisions techniques (SQL de matching, offsets Unicode, idempotence, caches…) |
+| `openspec/changes/mvp-v1/tasks.md` | **96 tâches** en 17 lots, chacune avec son critère de vérification |
+
+`core.spec.md` reste la spec de revue humaine ; les deltas natifs sont la source de vérité
+parsée par le CLI et seront fusionnés dans `openspec/specs/` à l'archivage du change.
 
 > Aucun code d'implémentation n'est écrit avant la validation de la spec.
 
