@@ -14,8 +14,8 @@ import {
 
 import { LanguagePair } from '../components/LanguagePair'
 import { LANGUAGES } from '../lib/languages'
+import { levelLabel, levelOptions, levelTooltip } from '../lib/levels'
 
-const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 
 function relativeDate(iso: string | null): string {
   if (!iso) return ''
@@ -166,16 +166,15 @@ export function WizardPage() {
             </label>
           </div>
           <div className="flex flex-wrap gap-2">
-            {LEVELS.map((value) => (
+            {levelOptions(target).map((option) => (
               <button
-                key={value}
+                key={option.code}
                 type="button"
-                onClick={() => setLevel(value)}
-                className={`rounded-lg px-4 py-2 text-sm ${
-                  value === level ? 'bg-brand-600' : 'border border-slate-700 hover:border-slate-500'
-                }`}
+                title={levelTooltip(option.code, target)}
+                onClick={() => setLevel(option.code)}
+                className={option.code === level ? 'btn-primary px-4 py-2' : 'btn-ghost px-4 py-2'}
               >
-                {value}
+                {option.label}
               </button>
             ))}
           </div>
@@ -336,7 +335,9 @@ export function DiscoverPage() {
                 target={current.target_language}
                 className="text-white/70"
               />{' '}
-              · niveau {current.target_level}
+              · <span title={levelTooltip(current.target_level)}>
+                niveau {levelLabel(current.target_level, current.target_language)}
+              </span>
             </p>
           </div>
           <span
@@ -609,7 +610,8 @@ export function ChatPage() {
               native={detail.other?.native_language}
               target={detail.other?.target_language}
             />{' '}
-            · affinité {detail.affinity_score}/100
+            · niveau {levelLabel(detail.other?.target_level, detail.other?.target_language)} ·
+            affinité {detail.affinity_score}/100
           </p>
         </div>
         <Link className="text-sm text-slate-400 underline" to="/messages">

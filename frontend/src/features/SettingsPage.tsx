@@ -3,9 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 
 import { LanguagePair } from '../components/LanguagePair'
 import { LANGUAGES } from '../lib/languages'
+import { levelOptions, levelTooltip } from '../lib/levels'
 import { api, setToken, type ProfileOut } from '../lib/api'
-
-const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 
 export function SettingsPage() {
   const navigate = useNavigate()
@@ -146,14 +145,15 @@ export function SettingsPage() {
           </label>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          {LEVELS.map((value) => (
+          {levelOptions(target).map((option) => (
             <button
-              key={value}
+              key={option.code}
               type="button"
-              onClick={() => setLevel(value)}
-              className={value === level ? 'btn-primary px-4 py-2' : 'btn-ghost px-4 py-2'}
+              title={levelTooltip(option.code, target)}
+              onClick={() => setLevel(option.code)}
+              className={option.code === level ? 'btn-primary px-4 py-2' : 'btn-ghost px-4 py-2'}
             >
-              {value}
+              {option.label}
             </button>
           ))}
         </div>
