@@ -19,6 +19,7 @@ const apiMock = vi.hoisted(() => ({
   send: vi.fn(),
   markRead: vi.fn(),
   translate: vi.fn(),
+  lexicon: vi.fn(),
   readingAid: vi.fn(),
   correct: vi.fn(),
   acceptCorrection: vi.fn(),
@@ -297,6 +298,43 @@ describe('Fil de discussion', () => {
     const ruby = await screen.findByText('私')
     expect(ruby.tagName.toLowerCase()).toBe('ruby')
     expect(screen.getByText('watashi')).toBeInTheDocument()
+  })
+
+  it('le mode mot à mot ouvre une aide lexicale au clic sur un mot', async () => {
+    apiMock.match.mockResolvedValue({
+      id: 'm-1',
+      status: 'active',
+      affinity_score: 100,
+      icebreakers: [],
+      other: {
+        user_id: 'u-1',
+        display_name: 'Yuki',
+        avatar_key: null,
+        bio: null,
+        birth_year: 1994,
+        native_language: 'fr',
+        target_language: 'ja',
+        target_level: 'A2',
+      },
+    })
+    apiMock.messages.mockResolvedValue({
+      items: [{ ...MESSAGE, body: 'le marché', body_rendered: 'le marché' }],
+      next_cursor: null,
+    })
+    apiMock.lexicon.mockResolvedValue({
+      word: 'marché',
+      source: 'wiktionnaire',
+      reading: null,
+      senses: [{ part_of_speech: 'commerce', definition: 'Lieu public de vente.' }],
+    })
+
+    renderChat()
+    await userEvent.click(await screen.findByRole('button', { name: 'Mot à mot' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'marché' }))
+
+    expect(apiMock.lexicon).toHaveBeenCalledWith('marché', 'fr')
+    expect(await screen.findByText(/Lieu public de vente/)).toBeInTheDocument()
+    expect(screen.getByText('Source : Wiktionnaire francophone')).toBeInTheDocument()
   })
 
   it('propose Accepter / Refuser sur une correction en attente', async () => {

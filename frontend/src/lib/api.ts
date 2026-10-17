@@ -301,6 +301,18 @@ export const api = {
       body: JSON.stringify({ message_id: messageId, lang: 'ja' }),
     }),
 
+  lexicon: (text: string, lang: string) =>
+    apiFetch<{
+      word: string
+      senses: Array<{ part_of_speech: string; definition: string }>
+      source: string
+      reading: { kana: string; romaji: string } | null
+    }>('/language/lexicon', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ text, lang }),
+    }),
+
   translateText: (text: string, source_lang: string, target_lang: string) =>
     apiFetch<{ translated: string; provider: string; cached: boolean }>('/language/translate', {
       method: 'POST',

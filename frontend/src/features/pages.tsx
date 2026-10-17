@@ -458,6 +458,14 @@ export function ChatPage() {
   const [reading, setReading] = useState<Record<string, Array<{ surface: string; romaji: string }>>>({})
   const [pendingCorrection, setPendingCorrection] = useState<{ message: Message; start: number; end: number } | null>(null)
   const [iceTranslations, setIceTranslations] = useState<Record<number, string>>({})
+  const [wordTokens, setWordTokens] = useState<Record<string, string[]>>({})
+  const [lexPanel, setLexPanel] = useState<{
+    word: string
+    source: string
+    senses: Array<{ part_of_speech: string; definition: string }>
+    reading: { kana: string; romaji: string } | null
+  } | null>(null)
+  const [lexBusy, setLexBusy] = useState(false)
   const [iceBusy, setIceBusy] = useState<number | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
 
@@ -518,6 +526,46 @@ export function ChatPage() {
       setReading((current) => ({ ...current, [message.id]: result.tokens }))
     } catch (err) {
       setError(errorMessage(err))
+    }
+  }
+
+  async function toggleWordMode(message: Message) {
+    if (wordTokens[message.id]) {
+      setWordTokens((current) => {
+        const next = { ...current }
+        delete next[message.id]
+        return next
+      })
+      return
+    }
+    const lang = detail?.other?.native_language ?? 'en'
+    try {
+      let tokens: string[]
+      if (lang === 'ja') {
+        const known = reading[message.id]
+        const fetched = known ?? (await api.readingAid(message.id)).tokens
+        if (!known) setReading((current) => ({ ...current, [message.id]: fetched }))
+        tokens = fetched.map((token) => token.surface)
+      } else {
+        tokens = message.body_rendered.split(/(\s+)/)
+      }
+      setWordTokens((current) => ({ ...current, [message.id]: tokens }))
+    } catch {
+      setError('Segmentation indisponible pour ce message.')
+    }
+  }
+
+  async function lookUp(raw: string) {
+    const word = raw.replace(/[.,!?;:«»"()\u3002\uff01\uff1f]/g, '').trim()
+    if (!word) return
+    setLexBusy(true)
+    try {
+      const lang = detail?.other?.native_language ?? 'en'
+      setLexPanel(await api.lexicon(word, lang))
+    } catch {
+      setError('Aide indisponible pour ce mot.')
+    } finally {
+      setLexBusy(false)
     }
   }
 
@@ -639,7 +687,21 @@ export function ChatPage() {
             className="bubble-them rise"
           >
             <p className="whitespace-pre-wrap text-slate-100">
-              {reading[message.id]
+              {wordTokens[message.id] ? (
+                wordTokens[message.id]?.map((token, position) =>
+                  /\p{L}/u.test(token) ? (
+                    <button
+                      key={position}
+                      className="rounded px-0.5 hover:bg-white/10 hover:underline"
+                      onClick={() => void lookUp(token)}
+                    >
+                      {token}
+                    </button>
+                  ) : (
+                    <span key={position}>{token}</span>
+                  ),
+                )
+              ) : reading[message.id]
                 ? (reading[message.id] ?? []).map((token, position) => (
                     <ruby key={position}>
                       {token.surface}
@@ -659,6 +721,9 @@ export function ChatPage() {
               </button>
               <button className="hover:underline" onClick={() => void showFurigana(message)}>
                 Furigana
+              </button>
+              <button className="hover:underline" onClick={() => void toggleWordMode(message)}>
+                {wordTokens[message.id] ? 'Quitter mot à mot' : 'Mot à mot'}
               </button>
               <span>{new Date(message.created_at).toLocaleString('fr-FR')}</span>
             </div>
@@ -720,6 +785,47 @@ export function ChatPage() {
             </button>
           </div>
         </form>
+      )}
+
+      {lexPanel && (
+        <aside className="rise mt-3 rounded-2xl border border-white/10 bg-[color:var(--ink-850)] p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="display text-lg">{lexPanel.word}</p>
+              {lexPanel.reading && (
+                <p className="text-xs text-white/45">
+                  {lexPanel.reading.kana} · {lexPanel.reading.romaji}
+                </p>
+              )}
+            </div>
+            <button
+              className="text-xs text-white/40 hover:text-white/70"
+              onClick={() => setLexPanel(null)}
+            >
+              Fermer
+            </button>
+          </div>
+          {lexPanel.senses.length === 0 ? (
+            <p className="mt-2 text-sm text-white/50">Aucun sens trouvé pour ce mot.</p>
+          ) : (
+            <ol className="mt-3 flex list-decimal flex-col gap-1.5 pl-5 text-sm text-white/75">
+              {lexPanel.senses.map((sense, index) => (
+                <li key={index}>
+                  {sense.part_of_speech !== '—' && (
+                    <span className="text-white/40">[{sense.part_of_speech}] </span>
+                  )}
+                  {sense.definition}
+                </li>
+              ))}
+            </ol>
+          )}
+          <p className="mt-3 text-[11px] text-white/30">
+            {lexPanel.source === 'wiktionnaire'
+              ? 'Source : Wiktionnaire francophone'
+              : 'Source indisponible — aucune définition affichée'}
+            {lexBusy && ' · recherche…'}
+          </p>
+        </aside>
       )}
 
       {error && <p className="mt-2 text-sm text-red-300">{error}</p>}
