@@ -7,13 +7,13 @@
 
 ## 1. Socle du dépôt et garde-fous
 
-- [ ] 1.1 Créer `backend/` (pyproject, `app/` par domaine selon design D-1, `tests/`) et `frontend/` (Vite + TS + Tailwind, structure `features/` de D-12) — **vérif** : `python -c "import app"` et `npm run build` passent sur un squelette vide.
-- [ ] 1.2 Configurer ruff + mypy (backend) et eslint + `tsc --noEmit` (frontend) — **vérif** : `ruff check .`, `mypy app`, `npm run lint` sortent en code 0.
-- [ ] 1.3 Créer `docker-compose.yml` (`api`, `db` PostgreSQL 16, `libretranslate` sous profil `translation`, `web`) et `Dockerfile` multi-stage — **vérif** : `docker compose config -q` puis `docker compose --profile translation up -d db` et `pg_isready` OK.
-- [ ] 1.4 Écrire `.env.example` exhaustif + `pydantic-settings` avec validation au démarrage (refus si secret manquant en prod) — **vérif** : démarrage sans `.env` échoue avec un message listant les variables manquantes.
-- [ ] 1.5 Écrire `scripts/no_llm_guard.py` (interdit `openai`, `anthropic`, `langchain`, `google-generativeai`, `ollama`, `transformers`, endpoints `chat/completions`) — **vérif** : test d'auto-validation avec un faux import `openai` qui fait échouer le script en code 1.
-- [ ] 1.6 Écrire `scripts/coverage_matrix.py` : extraire `(REQ-*, scénario)` des deltas, chercher l'identifiant dans `backend/tests` + `frontend/src`, produire `coverage.md`, sortir en code 1 si un scénario est orphelin — **vérif** : lancé sur le dépôt sans tests il liste 71 orphelins et échoue ; après le lot 3 il n'en liste plus pour `identity`.
-- [ ] 1.7 Mettre en place `.github/workflows/ci.yml` : lint, typecheck, tests backend (service Postgres 16), tests frontend, `no_llm_guard`, `coverage_matrix`, vérification de dérive OpenAPI — **vérif** : le workflow passe au vert sur un commit de squelette.
+- [x] 1.1 Créer `backend/` (pyproject, `app/` par domaine selon design D-1, `tests/`) et `frontend/` (Vite + TS + Tailwind, structure `features/` de D-12) — **vérif** : `python -c "import app"` et `npm run build` passent sur un squelette vide.
+- [x] 1.2 Configurer ruff + mypy (backend) et eslint + `tsc --noEmit` (frontend) — **vérif** : `ruff check .`, `mypy app`, `npm run lint` sortent en code 0.
+- [ ] 1.3 Créer `docker-compose.yml` (`api`, `db` PostgreSQL 16, `libretranslate` sous profil `translation`, `web`) et `Dockerfile` multi-stage — **vérif** : `docker compose config -q` puis `docker compose --profile translation up -d db` et `pg_isready` OK. ⚠️ *Non vérifié dans ce conteneur : aucun runtime de conteneurs (docker/podman/nerdctl absents). Fichiers écrits, YAML parsé, variables croisées avec `.env.example`.*
+- [x] 1.4 Écrire `.env.example` exhaustif + `pydantic-settings` avec validation au démarrage (refus si secret manquant en prod) — **vérif** : démarrage sans `.env` échoue avec un message listant les variables manquantes.
+- [x] 1.5 Écrire `scripts/no_llm_guard.py` (interdit `openai`, `anthropic`, `langchain`, `google-generativeai`, `ollama`, `transformers`, endpoints `chat/completions`) — **vérif** : test d'auto-validation avec un faux import `openai` qui fait échouer le script en code 1.
+- [x] 1.6 Écrire `scripts/coverage_matrix.py` : extraire `(REQ-*, scénario)` des deltas, chercher l'identifiant dans `backend/tests` + `frontend/src`, produire `coverage.md`, sortir en code 1 si un scénario est orphelin — **vérif** : lancé sur le dépôt sans tests il liste 71 orphelins et échoue ; après le lot 3 il n'en liste plus pour `identity`.
+- [ ] 1.7 Mettre en place `.github/workflows/ci.yml` : lint, typecheck, tests backend (service Postgres 16), tests frontend, `no_llm_guard`, `coverage_matrix`, vérification de dérive OpenAPI — **vérif** : le workflow passe au vert sur un commit de squelette. ⚠️ *YAML validé et toutes les commandes du workflow exécutées localement ; le run distant reste à confirmer après push.*
 
 ## 2. Plateforme et schéma (REQ-PLT-01, PLT-02, PLT-07)
 
