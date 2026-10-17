@@ -1,0 +1,44 @@
+schema: spec-driven
+
+context: |
+  Langue de travail : français. Tous les artefacts OpenSpec sont rédigés en français.
+  Conserver les titres structurels OpenSpec et les mots-clés SHALL / MUST /
+  WHEN / THEN en anglais (exigence du parseur).
+
+  ## Projet : LangLink
+  Plateforme de correspondance linguistique asynchrone 1-à-1, centrée sur des
+  centres d'intérêt communs. Deux applications découplées dès le départ :
+  - `backend/` : API REST (Python 3.12, FastAPI, SQLAlchemy 2, Alembic, PostgreSQL)
+  - `frontend/` : application web (React 18, TypeScript, Vite, TanStack Query, Tailwind)
+
+  Dépôt : https://github.com/LapassetAlexis/LangLink
+
+  ## Contraintes non négociables
+  - AUCUNE IA générative dans le produit : pas de LLM, pas de génération de texte,
+    pas de suggestions conversationnelles. Les icebreakers proviennent d'un catalogue
+    statique, la traduction d'un moteur déterministe (LibreTranslate/DeepL), les aides
+    à la lecture de bibliothèques déterministes (tokenizer + dictionnaire).
+  - Messagerie strictement asynchrone : pas de WebSocket temps réel, polling borné.
+  - La conversation ne s'ouvre QUE sur un like mutuel (match).
+  - Toute action destructive côté données utilisateur exige une confirmation explicite.
+  - Français par défaut dans l'UI, i18n prête (fr/en) sans traduction complète en V1.
+
+  ## Conventions de spécification
+  - Les exigences sont identifiées `REQ-<DOMAINE>-<NN>` (IDN, ONB, DSC, MAT, MSG, LNG, SAF, PLT).
+  - Chaque exigence porte au moins un scénario WHEN/THEN vérifiable par un test.
+  - Les décisions techniques par défaut sont listées en §15 et préfixées `D-NN`.
+  - Tout écart constaté entre spec et code se corrige dans le code, ou fait l'objet
+    d'un change OpenSpec explicite — jamais par édition silencieuse de la spec.
+
+rules:
+  proposal:
+    - "Inclure une section « Hors périmètre » explicite."
+    - "Rattacher chaque capacité touchée à un dossier openspec/specs/<capacité>/."
+  specs:
+    - "Une capacité = un dossier ; ne jamais dépasser 10 exigences par fichier, scinder sinon."
+    - "Chaque exigence doit avoir au moins un scénario testable."
+  design:
+    - "Justifier tout choix qui s'écarte des décisions par défaut D-NN du core.spec.md."
+  tasks:
+    - "Chaque tâche porte son propre critère de vérification (test, commande, artefact)."
+    - "Découper en lots livrables indépendamment, jamais un lot final « tests + doc »."
