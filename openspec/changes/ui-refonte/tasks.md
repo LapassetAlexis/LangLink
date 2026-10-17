@@ -27,6 +27,7 @@
 - [ ] 3.4 Overlay de match : deux avatars, score, intérêts communs, CTA — **vérif** : test Vitest sur un swipe renvoyant un match non nul.
 - [ ] 3.5 États vides et chargements : composant `EmptyState` (titre, texte, action) et `Skeleton` réutilisables — **vérif** : 3 écrans (découverte, inbox, fil) utilisent le même composant.
 - [x] 3.7 Remplacer les codes de langue par un drapeau + libellé partout (carte de découverte, boîte de réception, en-tête du fil, sélecteurs du wizard, carte d'accueil) — **vérif** : composant `LanguagePair` unique, 5 points d'affichage migrés, `aria-label` explicite, `tsc`/`eslint`/`vitest` verts.
+- [x] 3.8 Remplacer les drapeaux emoji par des SVG vectoriels (`country-flag-icons`, 13 composants tree-shakés) — **vérif** : `npm run build` vert, +18 Ko de JS pour 13 drapeaux, `tsc`/`eslint`/`vitest` verts, rendu identique sous Windows.
 - [ ] 3.6 Écran de réglages : profil, langues, intérêts, blocages, suppression de compte — **vérif** : route `/settings` accessible depuis le fil, formulaire prérempli.
 
 ## 4. Qualité et accessibilité

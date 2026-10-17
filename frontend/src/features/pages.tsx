@@ -125,7 +125,7 @@ export function WizardPage() {
               >
                 {LANGUAGES.map((language) => (
                   <option key={language.code} value={language.code}>
-                    {language.flag} {language.label}
+                    {language.label}
                   </option>
                 ))}
               </select>
@@ -139,7 +139,7 @@ export function WizardPage() {
               >
                 {LANGUAGES.map((language) => (
                   <option key={language.code} value={language.code}>
-                    {language.flag} {language.label}
+                    {language.label}
                   </option>
                 ))}
               </select>

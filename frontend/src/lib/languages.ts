@@ -9,49 +9,45 @@
 export interface LanguageInfo {
   code: string
   label: string
-  flag: string
+  /** Code pays ISO 3166-1 alpha-2, utilisé pour le drapeau SVG. */
+  country: string
 }
 
 export const LANGUAGES: LanguageInfo[] = [
-  { code: 'fr', label: 'Français', flag: '🇫🇷' },
-  { code: 'en', label: 'Anglais', flag: '🇬🇧' },
-  { code: 'es', label: 'Espagnol', flag: '🇪🇸' },
-  { code: 'de', label: 'Allemand', flag: '🇩🇪' },
-  { code: 'it', label: 'Italien', flag: '🇮🇹' },
-  { code: 'pt', label: 'Portugais', flag: '🇵🇹' },
-  { code: 'ja', label: 'Japonais', flag: '🇯🇵' },
-  { code: 'ko', label: 'Coréen', flag: '🇰🇷' },
-  { code: 'ar', label: 'Arabe', flag: '🇸🇦' },
-  { code: 'ru', label: 'Russe', flag: '🇷🇺' },
-  { code: 'tr', label: 'Turc', flag: '🇹🇷' },
-  { code: 'nl', label: 'Néerlandais', flag: '🇳🇱' },
-  { code: 'zh-Hans', label: 'Chinois', flag: '🇨🇳' },
+  { code: 'fr', label: 'Français', country: 'FR' },
+  { code: 'en', label: 'Anglais', country: 'GB' },
+  { code: 'es', label: 'Espagnol', country: 'ES' },
+  { code: 'de', label: 'Allemand', country: 'DE' },
+  { code: 'it', label: 'Italien', country: 'IT' },
+  { code: 'pt', label: 'Portugais', country: 'PT' },
+  { code: 'ja', label: 'Japonais', country: 'JP' },
+  { code: 'ko', label: 'Coréen', country: 'KR' },
+  { code: 'ar', label: 'Arabe', country: 'SA' },
+  { code: 'ru', label: 'Russe', country: 'RU' },
+  { code: 'tr', label: 'Turc', country: 'TR' },
+  { code: 'nl', label: 'Néerlandais', country: 'NL' },
+  { code: 'zh-Hans', label: 'Chinois', country: 'CN' },
 ]
 
 const BY_CODE = new Map(LANGUAGES.map((language) => [language.code.toLowerCase(), language]))
 
 export function languageInfo(code: string | null | undefined): LanguageInfo {
-  if (!code) return { code: '', label: 'Langue inconnue', flag: '🏳️' }
+  if (!code) return { code: '', label: 'Langue inconnue', country: '' }
   return (
     BY_CODE.get(code.toLowerCase()) ?? {
       code,
       label: code.toUpperCase(),
-      flag: '🏳️',
+      country: '',
     }
   )
 }
 
-export function flagOf(code: string | null | undefined): string {
-  return languageInfo(code).flag
+export function countryOf(code: string | null | undefined): string {
+  return languageInfo(code).country
 }
 
 export function labelOf(code: string | null | undefined): string {
   return languageInfo(code).label
-}
-
-/** « 🇫🇷 → 🇯🇵 » à partir de deux codes. */
-export function pairFlags(native: string | null | undefined, target: string | null | undefined): string {
-  return `${flagOf(native)} → ${flagOf(target)}`
 }
 
 /** Analyse une paire déjà formatée par l'API, du type « ja → fr ». */

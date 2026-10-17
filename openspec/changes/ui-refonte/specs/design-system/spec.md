@@ -105,8 +105,9 @@ sans apparition de défilement horizontal.
 
 ### Requirement: [REQ-UIX-07] Langues identifiées par un drapeau et un libellé
 
-Le système SHALL afficher toute langue avec un drapeau et son libellé en toutes lettres, et
-aucun écran SHALL présenter un code BCP-47 brut (`ja`, `fr`) à l'utilisateur.
+Le système SHALL afficher toute langue avec un drapeau **vectoriel (SVG)** et son libellé en
+toutes lettres, et aucun écran SHALL présenter un code BCP-47 brut (`ja`, `fr`) à
+l'utilisateur.
 
 #### Scenario: Paire de langues sur une carte de profil
 - **WHEN** un profil japonais apprend le français
@@ -118,7 +119,8 @@ aucun écran SHALL présenter un code BCP-47 brut (`ja`, `fr`) à l'utilisateur.
 - **THEN** il énonce les noms des langues, jamais le nom des emoji
 - **AND** les drapeaux sont marqués `aria-hidden`
 
-#### Scenario: Système sans rendu des emoji
-- **WHEN** la plateforme n'affiche pas les indicatifs régionaux (Windows)
-- **THEN** le libellé en toutes lettres reste lisible et suffit à comprendre
+#### Scenario: Rendu indépendant du système d'exploitation
+- **WHEN** la plateforme n'affiche pas les emoji d'indicatifs régionaux (Windows)
+- **THEN** le drapeau reste affiché, car il est vectoriel (SVG) et non emoji
+- **AND** le libellé en toutes lettres reste lisible
 - **AND** aucune information n'est portée par le seul drapeau
