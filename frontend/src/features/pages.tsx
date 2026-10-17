@@ -472,6 +472,33 @@ export function ChatPage() {
 
   const mine = useMemo(() => messages, [messages])
 
+  // premiere langue du correspondant : les questions sont traduites dès l'ouverture.
+  useEffect(() => {
+    const other = detail?.other
+    if (!other || other.native_language === 'fr') return
+    let cancelled = false
+    void Promise.all(
+      detail.icebreakers.map(async (ice) => {
+        try {
+          const result = await api.translateText(ice.question_fr, 'fr', other.native_language)
+          return [ice.position, result.translated] as const
+        } catch {
+          return null
+        }
+      }),
+    ).then((pairs) => {
+      if (cancelled) return
+      const next: Record<number, string> = {}
+      for (const pair of pairs) {
+        if (pair) next[pair[0]] = pair[1]
+      }
+      setIceTranslations((current) => ({ ...next, ...current }))
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [detail?.id, detail?.other?.native_language])
+
   useEffect(() => {
     void Promise.all([api.match(matchId), api.messages(matchId)])
       .then(([matchDetail, page]) => {
