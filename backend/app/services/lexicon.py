@@ -50,7 +50,8 @@ def parse_definitions(wikitext: str, limit: int = MAX_SENSES) -> list[dict[str, 
     senses: list[dict[str, str]] = []
     for raw in wikitext.splitlines():
         line = raw.strip()
-        if not line.startswith("#") or line.startswith("##"):
+        # `##` = sous-sens, `#*`/`#:`/`#;` = exemples et citations : hors périmètre.
+        if not line.startswith("#") or line[:2] in {"##", "#*", "#:", "#;"}:
             continue
         raw_definition = line[1:].strip()
         lead = _LEAD_TEMPLATE.match(raw_definition)
@@ -67,6 +68,8 @@ def parse_definitions(wikitext: str, limit: int = MAX_SENSES) -> list[dict[str, 
             definition = text
         if not definition:
             continue
+        if any(seen["definition"].lower().rstrip(".") == definition.lower().rstrip(".") for seen in senses):
+            continue  # doublon entre sections d'étymologie
         senses.append({"part_of_speech": speech, "definition": definition})
         if len(senses) >= limit:
             break

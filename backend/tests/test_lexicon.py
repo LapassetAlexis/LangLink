@@ -16,18 +16,21 @@ WIKITEXT = """== {{langue|fr}} ==
 # {{figuré|fr}} Convention, accord entre parties.
 ## Sous-sens qui ne doit pas remonter.
 # (Par extension) [[transaction|Transaction]] commerciale.<ref>Source</ref>
+#* {{exemple | lang=fr | Un marché fut conclu.}}
+#: Citation ignorée elle aussi.
 """
 
 
 def test_parser_extracts_numbered_definitions_only() -> None:
     senses = lexicon_service.parse_definitions(WIKITEXT)
 
-    assert len(senses) == 3
+    assert len(senses) == 3  # l'exemple et la citation sont ignorés
     assert senses[0]["part_of_speech"] == "commerce"
     assert senses[0]["definition"].startswith("Lieu public")
     assert senses[1]["part_of_speech"] == "figuré"
     assert senses[2]["definition"] == "Transaction commerciale."  # lien et <ref> nettoyés
     assert all("Sous-sens" not in sense["definition"] for sense in senses)
+    assert all("exemple" not in sense["definition"] for sense in senses)
 
 
 def test_parser_ignores_empty_and_markup_only_lines() -> None:
