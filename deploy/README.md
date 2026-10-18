@@ -78,3 +78,22 @@ Le volume s'appelle **`langlink_pgdata`** (nom explicite) : il survivra à la ba
 la stack complète.
 
 Vérifié sur cette base : PostgreSQL 16.15, `citext` 1.6, `jsonb`, `array`.
+
+## Migrations — à jouer AVANT de redéployer
+
+Le conteneur `api` ne joue **pas** `alembic upgrade head` au démarrage. Toute migration
+ajoutée au code doit donc être appliquée à la base de production avant le redéploiement,
+sinon l'API lit une colonne inexistante et renvoie **500**.
+
+```bash
+cd backend && . .venv/bin/activate
+TARGET_DB=langlink python /tmp/al.py upgrade head   # ou : alembic -x db=prod upgrade head
+TARGET_DB=langlink python /tmp/al.py current        # doit afficher la dernière révision
+```
+
+Incident du 18/10/2026 : la colonne `profiles.preferences` existait en code et en base de
+test, mais pas en production. Le bouton « Continuer » du wizard a renvoyé `Internal Server
+Error` jusqu'à ce que la migration soit jouée.
+
+Correctif durable (à faire) : copier `alembic/` et `alembic.ini` dans l'image et lancer
+`alembic upgrade head` avant `uvicorn` dans le `CMD` du conteneur.

@@ -22,3 +22,6 @@
 ## 4. Clôture
 
 - [ ] 4.1 `tsc`, `eslint`, `vitest`, `build`, `pytest`, `openspec validate --strict` — **vérif** : six commandes en code 0.
+- [ ] 5.1 Jouer les migrations automatiquement au démarrage du conteneur `api` (`COPY alembic`
+  + `alembic upgrade head && uvicorn …`) — **vérif** : un déploiement sur une base en retard applique la migration seule, `/healthz` reste 200.
+- [ ] 5.2 Test d'intégration « schéma à jour » : comparer `alembic current` à `heads` avant de servir du trafic — **vérif** : base volontairement en retard ⇒ démarrage refusé avec un message explicite, pas un 500 utilisateur.
