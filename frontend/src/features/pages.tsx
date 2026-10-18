@@ -417,53 +417,123 @@ export function InboxPage() {
   }, [])
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-4 px-6 py-10">
-      <h1 className="text-2xl font-semibold">Conversations</h1>
-      {error && <p className="text-red-300">{error}</p>}
-      {items.length === 0 && <p className="text-slate-400">Aucun match pour le moment.</p>}
-      <ul className="flex flex-col gap-2">
-        {items.map((conversation) => (
-          <li key={conversation.id}>
-            <Link
-              className="flex items-center justify-between rounded-2xl border border-white/5 bg-white/[0.02] px-5 py-4 transition hover:border-white/20 hover:bg-white/[0.04]"
-              to={`/messages/${conversation.id}`}
-            >
-              <span>
-                <span className="font-medium">{conversation.display_name}</span>
-                <span className="ml-2 text-xs text-white/45"><LanguagePair pair={conversation.languages} /></span>
-                <span className="block text-sm text-slate-400">
-                  {conversation.last_message ?? 'Nouveau match — dites bonjour'}
-                </span>
-              </span>
-              <span className="flex shrink-0 flex-col items-end gap-1">
-                {conversation.last_message_at && (
-                  <time
-                    className="text-[11px] text-white/35"
-                    dateTime={conversation.last_message_at}
-                    title={new Date(conversation.last_message_at).toLocaleString('fr-FR')}
-                  >
-                    {relativeDate(conversation.last_message_at)}
-                  </time>
-                )}
-                {conversation.status !== 'active' && (
-                  <span className="text-[11px] text-amber-300/80">
-                    {STATUS_LABEL[conversation.status] ?? conversation.status}
-                  </span>
-                )}
-                {conversation.unread_count > 0 && conversation.status === 'active' && (
-                  <span className="rounded-full bg-brand-600 px-2 py-0.5 text-xs">
-                    {conversation.unread_count}
-                  </span>
-                )}
-              </span>
+    <div className="mx-auto grid max-w-5xl gap-8 px-5 py-8 lg:grid-cols-[minmax(0,420px)_1fr]">
+      <section>
+        <header className="mb-5 flex items-baseline justify-between">
+          <h1 className="display text-2xl">Conversations</h1>
+          <span className="text-xs text-white/35">
+            {items.length} {items.length > 1 ? 'fils' : 'fil'}
+          </span>
+        </header>
+
+        {error && (
+          <p role="alert" className="rounded-2xl bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {error}
+          </p>
+        )}
+
+        {items.length === 0 ? (
+          <div className="surface flex flex-col items-start gap-3 p-6">
+            <p className="display text-lg">Aucune conversation</p>
+            <p className="text-sm leading-relaxed text-white/50">
+              Les conversations s&apos;ouvrent quand deux personnes se plaisent mutuellement.
+              Commence par parcourir quelques profils.
+            </p>
+            <Link className="btn-primary mt-1" to="/discover">
+              Découvrir des profils
             </Link>
-          </li>
-        ))}
-      </ul>
-      <Link className="text-sm text-slate-400 underline" to="/discover">
-        Découvrir des profils
-      </Link>
-    </main>
+          </div>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {items.map((conversation) => (
+              <li key={conversation.id}>
+                <Link
+                  className="group flex items-center gap-3.5 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-4 py-3.5 transition hover:border-white/20 hover:bg-white/[0.05]"
+                  to={`/messages/${conversation.id}`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-sm font-semibold text-[color:var(--ink-950)]"
+                    style={{
+                      background: 'linear-gradient(150deg, var(--amber-400), var(--rose-400))',
+                    }}
+                  >
+                    {conversation.display_name.slice(0, 1).toUpperCase()}
+                  </span>
+
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-baseline justify-between gap-2">
+                      <span className="truncate font-medium">{conversation.display_name}</span>
+                      {conversation.last_message_at && (
+                        <time
+                          className="shrink-0 text-[11px] text-white/30"
+                          dateTime={conversation.last_message_at}
+                          title={new Date(conversation.last_message_at).toLocaleString('fr-FR')}
+                        >
+                          {relativeDate(conversation.last_message_at)}
+                        </time>
+                      )}
+                    </span>
+                    <span className="mt-0.5 block truncate text-sm text-white/45 group-hover:text-white/60">
+                      {conversation.last_message ?? 'Nouveau match — dites bonjour'}
+                    </span>
+                    <span className="mt-1 flex items-center gap-2 text-[11px] text-white/30">
+                      <LanguagePair pair={conversation.languages} />
+                      {conversation.status !== 'active' && (
+                        <span className="text-amber-300/80">
+                          · {STATUS_LABEL[conversation.status] ?? conversation.status}
+                        </span>
+                      )}
+                    </span>
+                  </span>
+
+                  {conversation.unread_count > 0 && conversation.status === 'active' && (
+                    <span className="shrink-0 rounded-full bg-brand-500 px-2 py-0.5 text-[11px] font-semibold text-[color:var(--ink-950)]">
+                      {conversation.unread_count}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <aside className="hidden lg:block">
+        <div
+          className="relative overflow-hidden rounded-3xl border border-white/[0.06] p-8"
+          style={{
+            background:
+              'radial-gradient(120% 90% at 15% 0%, rgba(240,179,87,0.14), transparent 60%), radial-gradient(90% 80% at 90% 100%, rgba(111,211,192,0.12), transparent 55%), var(--ink-850)',
+          }}
+        >
+          <p className="eyebrow">Correspondance</p>
+          <p className="display mt-3 text-2xl leading-snug">
+            Chaque message est corrigé par une personne, jamais par une machine.
+          </p>
+          <ul className="mt-6 flex flex-col gap-3 text-sm text-white/55">
+            <li className="flex gap-3">
+              <span aria-hidden="true" className="text-brand-400">
+                ✳
+              </span>
+              Sélectionne un fil pour reprendre la discussion.
+            </li>
+            <li className="flex gap-3">
+              <span aria-hidden="true" className="text-brand-400">
+                ✳
+              </span>
+              L&apos;heure affichée est celle de ton correspondant.
+            </li>
+            <li className="flex gap-3">
+              <span aria-hidden="true" className="text-brand-400">
+                ✳
+              </span>
+              Survole un mot pour en demander le sens.
+            </li>
+          </ul>
+        </div>
+      </aside>
+    </div>
   )
 }
 

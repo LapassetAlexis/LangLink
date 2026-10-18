@@ -3,6 +3,7 @@ import { Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 
 import { SettingsPage } from '../features/SettingsPage'
 import { ChatPage, DiscoverPage, InboxPage, WizardPage } from '../features/pages'
+import { AppShell } from '../components/AppShell'
 import { Flag } from '../components/Flag'
 import { api, getToken, setToken } from '../lib/api'
 
@@ -292,27 +293,9 @@ function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
   )
 }
 
-function AccountMenu() {
-  return (
-    <nav className="fixed right-4 top-4 z-20 flex items-center gap-2">
-      <Link
-        to="/settings"
-        className="rounded-full border border-white/10 bg-[color:var(--ink-850)] px-4 py-2 text-xs text-white/70 transition hover:border-white/30 hover:text-white"
-      >
-        Mon compte
-      </Link>
-    </nav>
-  )
-}
-
-function Guard({ children }: { children: React.ReactNode }) {
+function Guard({ children, wide = false }: { children: React.ReactNode; wide?: boolean }) {
   if (!getToken()) return <Navigate to="/login" replace />
-  return (
-    <>
-      <AccountMenu />
-      {children}
-    </>
-  )
+  return <AppShell wide={wide}>{children}</AppShell>
 }
 
 export function App() {
@@ -355,7 +338,7 @@ export function App() {
       <Route
         path="/messages"
         element={
-          <Guard>
+          <Guard wide>
             <InboxPage />
           </Guard>
         }
@@ -371,7 +354,7 @@ export function App() {
       <Route
         path="/messages/:matchId"
         element={
-          <Guard>
+          <Guard wide>
             <ChatPage />
           </Guard>
         }

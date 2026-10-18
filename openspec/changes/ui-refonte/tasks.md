@@ -36,3 +36,8 @@
 - [ ] 4.2 Vérifier l'absence de défilement horizontal à 360 px sur les 5 écrans — **vérif** : capture ou test jsdom à 360 px, `scrollWidth <= clientWidth`.
 - [ ] 4.3 Parcours clavier complet : tabulation visible sur accueil, auth, wizard, découverte, fil — **vérif** : test Vitest « focus » sur 2 écrans + revue manuelle consignée.
 - [ ] 4.4 Documenter la direction visuelle dans `frontend/README.md` (palette, typo, primitives) — **vérif** : le fichier liste les 7 primitives et la règle « pas d'opacité sur `var()` ».
+
+## 6. Coquille applicative et messagerie
+
+- [x] 6.1 Coquille commune `AppShell` : en-tête collant, navigation (Découvrir / Messages / Mon compte), largeur bornée sur les formulaires — **vérif** : ✅ 3 vues authentifiées utilisent la même coquille, `tsc`/`lint`/`build` verts.
+- [x] 6.2 Liste de conversations : avatar à initiale, aperçu, heure relative, badge de non-lus, état vide avec action, colonne latérale éditoriale en `lg` — **vérif** : ✅ plus de lien bleu par défaut, aucune zone morte > 50 % sur écran large.
