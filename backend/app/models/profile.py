@@ -62,9 +62,8 @@ class Profile(Base):
     preferences: Mapped[dict[str, object]] = mapped_column(
         JSONB, nullable=False, server_default=text("'{}'::jsonb"), default=dict
     )
-    timezone: Mapped[str] = mapped_column(
-        String(64), nullable=False, server_default=text("'Europe/Paris'")
-    )
+    # NULL = fuseau inconnu : l'affichage retombe alors sur le pays de la langue.
+    timezone: Mapped[str | None] = mapped_column(String(64), nullable=True)
     updated_at: Mapped[dt.datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

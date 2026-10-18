@@ -13,7 +13,7 @@ import {
 } from '../lib/api'
 
 import { LanguagePair } from '../components/LanguagePair'
-import { labelOf, LANGUAGES } from '../lib/languages'
+import { defaultTimezoneOf, labelOf, LANGUAGES } from '../lib/languages'
 import { levelLabel, levelOptions, levelTooltip } from '../lib/levels'
 
 
@@ -539,7 +539,7 @@ export function ChatPage() {
       setGreeting(null)
       return
     }
-    const theirClock = localClock(other.timezone)
+    const theirClock = localClock(other.timezone ?? defaultTimezoneOf(other.native_language))
     const hour = theirClock?.hour ?? new Date().getHours()
     const french = hour < 18 ? 'Bonjour' : 'Bonsoir'
     if (other.native_language === 'fr') {
@@ -692,11 +692,13 @@ export function ChatPage() {
             · niveau {levelLabel(detail.other?.target_level, detail.other?.target_language)} ·
             affinité {detail.affinity_score}/100
             {(() => {
-              const clock = localClock(detail.other?.timezone)
+              const clock = localClock(
+                detail.other?.timezone ?? defaultTimezoneOf(detail.other?.native_language),
+              )
               return clock ? (
                 <span className="block text-[11px] text-white/35">
                   il est {clock.time} chez {detail.other?.display_name}
-                  {detail.other?.timezone ? ` (${detail.other.timezone})` : ''}
+                  {` (${detail.other?.timezone ?? defaultTimezoneOf(detail.other?.native_language) ?? '?'})`}
                 </span>
               ) : null
             })()}
