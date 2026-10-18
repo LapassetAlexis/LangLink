@@ -8,17 +8,20 @@ L'invariant vérifiable : dans la table `messages`, chaque ligne porte un `sende
 authentifié. Aucune ligne ne peut être produite par un service. C'est testable en base, alors
 que « pas d'IA » ne l'est pas.
 
-### D-2 — Assistance : déterministe par défaut, générative sur décision explicite
+### D-2 — Assistance : déterministe uniquement (décision du 18/10/2026)
 
-Deux niveaux, à trancher séparément :
+**Aucun LLM, à aucun niveau.** L'assistance se limite à trois moteurs déterministes :
 
-| Niveau | Exemple | Statut |
+| Outil | Usage | Nature |
 |---|---|---|
-| Déterministe | LibreTranslate, Wiktionnaire, fugashi | ✅ déjà en place |
-| Générative | LLM qui explique une nuance, reformule | ⏸️ **non tranché** |
+| LibreTranslate (auto-hébergé) | traduction à la demande | déterministe, local |
+| Wiktionnaire (API MediaWiki) | sens multiples d'un mot | dictionnaire existant |
+| fugashi + pykakasi | lecture et romaji du japonais | analyse morphologique locale |
 
-Si le niveau génératif est un jour activé : consentement explicite, mention systématique,
-et jamais dans le fil (uniquement dans le tiroir d'assistance).
+Le « petit bot en bas » évoqué par Alexis est un **tiroir d'assistance à la traduction**, pas
+un agent : il ne comprend pas, il ne répond pas, il traduit et il affiche des définitions.
+Conséquence directe : le garde-fou `no_llm_guard.py` **reste un interdit global**, sans
+exception. Aucun répertoire d'assistance n'est ouvert aux clients de modèle.
 
 ### D-3 — Le garde-fou doit changer de forme, pas disparaître
 

@@ -27,7 +27,7 @@ produit se définit par la nature de l'échange, pas par l'absence d'algorithmes
 ## Hors périmètre
 
 - Autoriser un agent conversationnel : exclu par définition.
-- Choisir la bibliothèque d'assistance : décision séparée (design D-2).
+- Assistance générative : **écartée** (décision du 18/10/2026) — aucun LLM, aucun niveau.
 
 ## Impact
 
