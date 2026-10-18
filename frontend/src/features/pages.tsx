@@ -31,6 +31,26 @@ function relativeDate(iso: string | null): string {
   return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
 }
 
+function localClock(timezone: string | null | undefined): { time: string; hour: number } | null {
+  if (!timezone) return null
+  try {
+    const now = new Date()
+    const time = new Intl.DateTimeFormat('fr-FR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: timezone,
+    }).format(now)
+    const hour = Number(
+      new Intl.DateTimeFormat('en-GB', { hour: '2-digit', hour12: false, timeZone: timezone }).format(
+        now,
+      ),
+    )
+    return { time, hour }
+  } catch {
+    return null
+  }
+}
+
 const STATUS_LABEL: Record<string, string> = {
   active: '',
   unmatched: 'conversation fermée',
@@ -519,7 +539,8 @@ export function ChatPage() {
       setGreeting(null)
       return
     }
-    const hour = new Date().getHours()
+    const theirClock = localClock(other.timezone)
+    const hour = theirClock?.hour ?? new Date().getHours()
     const french = hour < 18 ? 'Bonjour' : 'Bonsoir'
     if (other.native_language === 'fr') {
       setGreeting(french)
@@ -670,6 +691,15 @@ export function ChatPage() {
             />{' '}
             · niveau {levelLabel(detail.other?.target_level, detail.other?.target_language)} ·
             affinité {detail.affinity_score}/100
+            {(() => {
+              const clock = localClock(detail.other?.timezone)
+              return clock ? (
+                <span className="block text-[11px] text-white/35">
+                  il est {clock.time} chez {detail.other?.display_name}
+                  {detail.other?.timezone ? ` (${detail.other.timezone})` : ''}
+                </span>
+              ) : null
+            })()}
           </p>
         </div>
         <Link className="text-sm text-slate-400 underline" to="/messages">

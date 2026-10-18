@@ -20,6 +20,15 @@ COMMON_WEAK = {
 MIN_LENGTH = 10
 
 
+def _valid_timezone(value: str | None) -> str | None:
+    """N'accepte qu'un identifiant IANA réel : un fuseau inventé est ignoré, jamais fatal."""
+    if not value:
+        return None
+    from zoneinfo import available_timezones
+
+    return value if value in available_timezones() else None
+
+
 async def register(
     session: AsyncSession,
     *,
@@ -27,6 +36,7 @@ async def register(
     password: str,
     display_name: str | None = None,
     locale: str = "fr",
+    timezone: str | None = None,
 ) -> User:
     """Crée un compte actif + un profil vide. La vérification d'email n'est pas bloquante."""
     normalized = email.lower().strip()
@@ -49,7 +59,13 @@ async def register(
     await session.flush()
 
     name = display_name or normalized.split("@")[0][:40] or "Explorateur"
-    session.add(Profile(user_id=user.id, display_name=name[:40]))
+    session.add(
+        Profile(
+            user_id=user.id,
+            display_name=name[:40],
+            timezone=_valid_timezone(timezone),
+        )
+    )
     await session.commit()
     await session.refresh(user)
     return user

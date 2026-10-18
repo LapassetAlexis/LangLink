@@ -89,6 +89,7 @@ async def register(
         password=payload.password,
         display_name=payload.display_name,
         locale=payload.locale,
+        timezone=payload.timezone,
     )
     return await _token_response(session, user, request, response)
 

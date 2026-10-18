@@ -112,6 +112,7 @@ export interface MatchDetail {
     native_language: string
     target_language: string
     target_level: string
+    timezone: string | null
   } | null
   icebreakers: Icebreaker[]
 }
@@ -181,7 +182,12 @@ export const api = {
   register: (email: string, password: string) =>
     apiFetch<TokenResponse>('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({
+        email,
+        password,
+        // Fuseau IANA du navigateur : permet d'afficher l'heure locale du correspondant.
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      }),
     }),
 
   login: (email: string, password: string) =>

@@ -62,7 +62,7 @@ async def get_match(match_id: uuid.UUID, user: CurrentUser, session: SessionDep)
         await session.execute(
             text(
                 "SELECT p.user_id, p.display_name, p.avatar_key, p.bio, p.birth_year,"
-                " p.native_language, p.target_language, p.target_level"
+                " p.native_language, p.target_language, p.target_level, p.timezone"
                 " FROM profiles p WHERE p.user_id = :oid"
             ),
             {"oid": row["other_id"]},

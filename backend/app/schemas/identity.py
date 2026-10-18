@@ -14,6 +14,7 @@ class RegisterIn(BaseModel):
     password: str = Field(min_length=MIN_PW_LEN, max_length=128)
     display_name: str | None = Field(default=None, min_length=2, max_length=40)
     locale: str = Field(default="fr", max_length=8)
+    timezone: str | None = Field(default=None, max_length=64)
 
 
 class LoginIn(BaseModel):
