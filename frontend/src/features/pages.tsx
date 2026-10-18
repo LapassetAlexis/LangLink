@@ -1017,7 +1017,8 @@ export function ChatPage() {
       {error && <p className="mt-2 text-sm text-red-300">{error}</p>}
 
       <AssistDock
-        targetLang={detail.other?.native_language}
+        mine={detail.other?.target_language}
+        theirs={detail.other?.native_language}
         onInsert={(translated) => setDraft((current) => (current ? `${current} ${translated}` : translated))}
       />
 

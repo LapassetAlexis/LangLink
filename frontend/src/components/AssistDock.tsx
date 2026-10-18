@@ -1,36 +1,46 @@
 import { useState } from 'react'
 
 import { api } from '../lib/api'
+import { labelOf } from '../lib/languages'
 
 interface Props {
-  /** Langue du correspondant : cible de la traduction. */
-  targetLang: string | null | undefined
-  /** Langue du lecteur : langue source. */
-  sourceLang?: string | null
+  /** Ma langue maternelle (= ce que le correspondant apprend). */
+  mine: string | null | undefined
+  /** Langue maternelle du correspondant (= ce que j'apprends). */
+  theirs: string | null | undefined
   onInsert: (text: string) => void
 }
 
 /**
- * Tiroir d'assistance à la traduction (aucun modèle de langage).
+ * Tiroir d'assistance à la traduction, dans les deux sens de la conversation.
  *
- * Ce n'est pas un agent : il ne comprend rien, il ne répond pas, il ne rédige pas. Il envoie
- * le texte à un moteur déterministe (LibreTranslate auto-hébergé) et affiche le résultat avec
- * sa provenance — exigence REQ-PLT-08.
+ * Aucun modèle de langage : moteur déterministe auto-hébergé, provenance affichée
+ * (REQ-PLT-08). Ce n'est pas un interlocuteur, seulement un outil.
  */
-export function AssistDock({ targetLang, sourceLang = 'fr', onInsert }: Props) {
+export function AssistDock({ mine, theirs, onInsert }: Props) {
   const [open, setOpen] = useState(false)
+  const [towardsThem, setTowardsThem] = useState(true)
   const [text, setText] = useState('')
   const [result, setResult] = useState<{ translated: string; provider: string } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
+  const source = towardsThem ? (mine ?? 'fr') : (theirs ?? 'ja')
+  const target = towardsThem ? (theirs ?? 'ja') : (mine ?? 'fr')
+
+  function reset(): void {
+    setOpen(false)
+    setResult(null)
+    setError(null)
+  }
+
   async function translate() {
     const value = text.trim()
-    if (!value || !targetLang) return
+    if (!value || !source || !target) return
     setBusy(true)
     setError(null)
     try {
-      const response = await api.translateText(value, sourceLang ?? 'fr', targetLang)
+      const response = await api.translateText(value, source, target)
       setResult({ translated: response.translated, provider: response.provider })
     } catch {
       setError('Moteur de traduction indisponible.')
@@ -56,24 +66,60 @@ export function AssistDock({ targetLang, sourceLang = 'fr', onInsert }: Props) {
         <div>
           <p className="text-[11px] uppercase tracking-widest text-white/35">Aide à la traduction</p>
           <p className="mt-0.5 text-xs text-white/45">
-            Vers {targetLang ?? '—'} · moteur déterministe, aucun modèle de langage
+            Moteur déterministe, aucun modèle de langage
           </p>
         </div>
-        <button
-          className="text-xs text-white/40 hover:text-white/70"
-          onClick={() => {
-            setOpen(false)
-            setResult(null)
-            setError(null)
-          }}
-        >
+        <button className="text-xs text-white/40 hover:text-white/70" onClick={reset}>
           Fermer
         </button>
       </header>
 
+      <div className="mt-3 flex items-center gap-2">
+        <div
+          role="group"
+          aria-label="Sens de la traduction"
+          className="flex rounded-full border border-white/10 p-0.5 text-xs"
+        >
+          <button
+            type="button"
+            aria-pressed={towardsThem}
+            className={`rounded-full px-3 py-1.5 transition ${
+              towardsThem ? 'bg-brand-500 font-medium text-[color:var(--ink-950)]' : 'text-white/55'
+            }`}
+            onClick={() => {
+              setTowardsThem(true)
+              setResult(null)
+            }}
+          >
+            {labelOf(source)} → {labelOf(theirs)}
+          </button>
+          <button
+            type="button"
+            aria-pressed={!towardsThem}
+            className={`rounded-full px-3 py-1.5 transition ${
+              !towardsThem ? 'bg-brand-500 font-medium text-[color:var(--ink-950)]' : 'text-white/55'
+            }`}
+            onClick={() => {
+              setTowardsThem(false)
+              setResult(null)
+            }}
+          >
+            {labelOf(theirs)} → {labelOf(mine)}
+          </button>
+        </div>
+      </div>
+
+      <p className="mt-2 text-[11px] text-white/30">
+        Traduction vers le {labelOf(target).toLowerCase()} · {labelOf(source)} en entrée
+      </p>
+
       <textarea
-        className="field mt-3 min-h-16 resize-y text-sm"
-        placeholder="Colle une phrase, ou sélectionne-la dans un message…"
+        className="field mt-2 min-h-16 resize-y text-sm"
+        placeholder={
+          towardsThem
+            ? 'Ce que tu veux dire, en français…'
+            : 'Ce que tu veux comprendre, en japonais…'
+        }
         maxLength={1200}
         value={text}
         onChange={(event) => setText(event.target.value)}
