@@ -13,12 +13,12 @@ from app.core.security import verify_password
 from app.models.identity import RefreshToken
 from app.models.profile import Interest, Profile, UserInterest
 from app.schemas.onboarding import (
-    PreferencesIn,
     AvailabilityIn,
     CompleteOut,
     InterestGroupOut,
     InterestsIn,
     LanguagesIn,
+    PreferencesIn,
     ProfileIn,
     ProfileOut,
     StateOut,

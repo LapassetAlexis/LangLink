@@ -5,7 +5,6 @@ from __future__ import annotations
 import datetime as dt
 import uuid
 
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
@@ -18,6 +17,7 @@ from sqlalchemy import (
     func,
     text,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base

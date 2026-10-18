@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from typing import Literal
 
 from app.services.onboarding import CECRL, MAX_INTERESTS, MIN_INTERESTS
 from pydantic import BaseModel, Field
