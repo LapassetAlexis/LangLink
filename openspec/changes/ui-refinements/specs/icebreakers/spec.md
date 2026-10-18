@@ -20,3 +20,19 @@ correspondant, et SHALL offrir une bascule vers la langue maternelle du lecteur.
 #### Scenario: Bascule mémorisée
 - **WHEN** le lecteur bascule une question en français
 - **THEN** le choix s'applique à la session sans nouvel appel réseau
+
+### Requirement: [REQ-ICE-05] Salutation proposée au premier message du jour
+
+Le système SHALL proposer une salutation dans la langue du correspondant lorsque aucun
+message n'a encore été échangé ce jour-là, sans l'envoyer automatiquement.
+
+#### Scenario: Aucun message aujourd'hui
+- **WHEN** le lecteur ouvre un fil où le dernier message date d'hier ou est absent
+- **THEN** une salutation adaptée à l'heure (matin/soir) est proposée dans la langue du
+  correspondant
+- **AND** un bouton permet de l'insérer dans la zone de saisie
+- **AND** rien n'est envoyé sans action du lecteur
+
+#### Scenario: Conversation déjà entamée aujourd'hui
+- **WHEN** au moins un message a été échangé dans la journée
+- **THEN** aucune salutation n'est proposée

@@ -467,6 +467,7 @@ export function ChatPage() {
     reading: { kana: string; romaji: string } | null
   } | null>(null)
   const [lexBusy, setLexBusy] = useState(false)
+  const [greeting, setGreeting] = useState<string | null>(null)
   const [iceBusy, setIceBusy] = useState<number | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
 
@@ -507,6 +508,36 @@ export function ChatPage() {
       })
       .catch((err) => setError(errorMessage(err)))
   }, [matchId])
+
+  const today = new Date().toDateString()
+  const alreadyToday = messages.some((m) => new Date(m.created_at).toDateString() === today)
+
+  // Salutation du jour : proposée, jamais envoyée seule (REQ-ICE-05).
+  useEffect(() => {
+    const other = detail?.other
+    if (!other || alreadyToday) {
+      setGreeting(null)
+      return
+    }
+    const hour = new Date().getHours()
+    const french = hour < 18 ? 'Bonjour' : 'Bonsoir'
+    if (other.native_language === 'fr') {
+      setGreeting(french)
+      return
+    }
+    let cancelled = false
+    api
+      .translateText(french, 'fr', other.native_language)
+      .then((result) => {
+        if (!cancelled) setGreeting(result.translated)
+      })
+      .catch(() => {
+        if (!cancelled) setGreeting(french)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [detail?.id, detail?.other?.native_language, alreadyToday])
 
   useEffect(() => {
     const last = messages.at(-1)
@@ -645,6 +676,20 @@ export function ChatPage() {
           Retour
         </Link>
       </header>
+
+      {greeting && !alreadyToday && (
+        <aside className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+          <div>
+            <p className="text-[11px] uppercase tracking-widest text-white/35">
+              Pour commencer la journée
+            </p>
+            <p className="mt-0.5 text-sm text-white/80">{greeting}</p>
+          </div>
+          <button className="btn-ghost px-4 py-2 text-xs" onClick={() => setDraft(greeting)}>
+            Utiliser
+          </button>
+        </aside>
+      )}
 
       {detail.icebreakers.length > 0 && (
         <aside className="mb-4 rounded-xl border border-slate-800 p-3">
