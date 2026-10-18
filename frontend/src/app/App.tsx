@@ -172,7 +172,14 @@ function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
       const result =
         mode === 'signup' ? await api.register(email, password) : await api.login(email, password)
       setToken(result.access_token)
-      navigate('/onboarding')
+
+      // À l'inscription : wizard. À la connexion : on reprend là où l'utilisateur en est.
+      if (mode === 'signup') {
+        navigate('/onboarding')
+        return
+      }
+      const session = await api.me()
+      navigate(session.onboarding.missing.length > 0 ? '/onboarding' : '/messages')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Échec inattendu')
     } finally {

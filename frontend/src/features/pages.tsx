@@ -13,7 +13,7 @@ import {
 } from '../lib/api'
 
 import { LanguagePair } from '../components/LanguagePair'
-import { LANGUAGES } from '../lib/languages'
+import { labelOf, LANGUAGES } from '../lib/languages'
 import { levelLabel, levelOptions, levelTooltip } from '../lib/levels'
 
 
@@ -201,7 +201,7 @@ export function WizardPage() {
           <p className="text-sm text-slate-400">
             {native === target
               ? 'Choisissez deux langues différentes.'
-              : `Vous apprendrez le ${target} · votre correspondant apprendra le ${native}.`}
+              : `Vous apprendrez le ${labelOf(target).toLowerCase()} · votre correspondant apprendra le ${labelOf(native).toLowerCase()}.`}
           </p>
           <button
             className="self-start rounded-lg bg-brand-600 px-5 py-3 font-medium disabled:opacity-40"
