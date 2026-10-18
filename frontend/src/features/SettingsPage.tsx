@@ -4,7 +4,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { LanguagePair } from '../components/LanguagePair'
 import { LANGUAGES } from '../lib/languages'
 import { levelOptions, levelTooltip } from '../lib/levels'
-import { api, setToken, type ProfileOut } from '../lib/api'
+import { api, DEFAULT_PREFERENCES, setToken, type Preferences, type ProfileOut } from '../lib/api'
+import { applyPreferences } from '../lib/preferences'
 
 export function SettingsPage() {
   const navigate = useNavigate()
@@ -18,10 +19,12 @@ export function SettingsPage() {
   const [password, setPassword] = useState('')
   const [notice, setNotice] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [prefs, setPrefs] = useState<Preferences>(DEFAULT_PREFERENCES)
 
   useEffect(() => {
-    void Promise.all([api.profile(), api.blocks()])
-      .then(([current, blocked]) => {
+    void Promise.all([api.profile(), api.blocks(), api.preferences()])
+      .then(([current, blocked, stored]) => {
+        setPrefs({ ...DEFAULT_PREFERENCES, ...stored.preferences })
         setProfile(current)
         setName(current.display_name)
         setBio(current.bio ?? '')
@@ -91,6 +94,80 @@ export function SettingsPage() {
           {error}
         </p>
       )}
+
+      <section className="surface p-6">
+        <h2 className="display text-xl">Affichage</h2>
+        <p className="mt-1 text-sm text-white/45">
+          Ces réglages s&apos;appliquent à toute l&apos;application.
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <label className="flex flex-col gap-1.5 text-sm text-white/60">
+            Densité
+            <select
+              className="field"
+              value={prefs.density}
+              onChange={(e) => setPrefs({ ...prefs, density: e.target.value as Preferences['density'] })}
+            >
+              <option value="confort">Confort</option>
+              <option value="compact">Compact</option>
+            </select>
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm text-white/60">
+            Taille du texte
+            <select
+              className="field"
+              value={prefs.text_size}
+              onChange={(e) => setPrefs({ ...prefs, text_size: e.target.value as Preferences['text_size'] })}
+            >
+              <option value="normal">Normale</option>
+              <option value="large">Grande</option>
+            </select>
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm text-white/60">
+            Animations
+            <select
+              className="field"
+              value={prefs.motion}
+              onChange={(e) => setPrefs({ ...prefs, motion: e.target.value as Preferences['motion'] })}
+            >
+              <option value="system">Suivre le système</option>
+              <option value="normal">Normales</option>
+              <option value="reduce">Réduites</option>
+            </select>
+          </label>
+          <label className="flex items-center gap-3 text-sm text-white/60">
+            <input
+              type="checkbox"
+              checked={prefs.furigana_auto}
+              onChange={(e) => setPrefs({ ...prefs, furigana_auto: e.target.checked })}
+            />
+            Furigana automatique
+          </label>
+          <label className="flex items-center gap-3 text-sm text-white/60">
+            <input
+              type="checkbox"
+              checked={prefs.word_mode_default}
+              onChange={(e) => setPrefs({ ...prefs, word_mode_default: e.target.checked })}
+            />
+            Mode mot à mot par défaut
+          </label>
+        </div>
+        <button
+          className="btn-primary mt-4"
+          onClick={async () => {
+            try {
+              const saved = await api.savePreferences(prefs)
+              setPrefs({ ...DEFAULT_PREFERENCES, ...saved.preferences })
+              applyPreferences(prefs)
+              setNotice('Préférences enregistrées.')
+            } catch (err) {
+              setError(err instanceof Error ? err.message : 'Erreur')
+            }
+          }}
+        >
+          Enregistrer les préférences
+        </button>
+      </section>
 
       <section className="surface p-6">
         <h2 className="display text-xl">Profil</h2>

@@ -141,6 +141,22 @@ export interface Message {
   corrections: Correction[]
 }
 
+export interface Preferences {
+  furigana_auto: boolean
+  word_mode_default: boolean
+  text_size: 'normal' | 'large'
+  density: 'confort' | 'compact'
+  motion: 'system' | 'reduce' | 'normal'
+}
+
+export const DEFAULT_PREFERENCES: Preferences = {
+  furigana_auto: false,
+  word_mode_default: false,
+  text_size: 'normal',
+  density: 'confort',
+  motion: 'system',
+}
+
 export interface ProfileOut {
   user_id: string
   display_name: string
@@ -324,6 +340,16 @@ export const api = {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify({ text, source_lang, target_lang }),
+    }),
+
+  preferences: () =>
+    apiFetch<{ preferences: Preferences }>('/me/preferences', { headers: authHeaders() }),
+
+  savePreferences: (preferences: Preferences) =>
+    apiFetch<{ preferences: Preferences }>('/me/preferences', {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify(preferences),
     }),
 
   profile: () => apiFetch<ProfileOut>('/me/profile', { headers: authHeaders() }),

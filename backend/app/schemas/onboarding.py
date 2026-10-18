@@ -75,3 +75,15 @@ class CompleteOut(BaseModel):
 
 SUPPORTED_LEVELS = CECRL
 MIN = MIN_INTERESTS
+
+
+class PreferencesIn(BaseModel):
+    """Préférences d'affichage. Clés inconnues refusées : pas de jsonb fourre-tout."""
+
+    model_config = {"extra": "forbid"}
+
+    furigana_auto: bool = False
+    word_mode_default: bool = False
+    text_size: Literal["normal", "large"] = "normal"
+    density: Literal["confort", "compact"] = "confort"
+    motion: Literal["system", "reduce", "normal"] = "system"

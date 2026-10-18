@@ -13,6 +13,7 @@ from app.core.security import verify_password
 from app.models.identity import RefreshToken
 from app.models.profile import Interest, Profile, UserInterest
 from app.schemas.onboarding import (
+    PreferencesIn,
     AvailabilityIn,
     CompleteOut,
     InterestGroupOut,
@@ -269,3 +270,23 @@ async def delete_account(
 @router.get("/me/interests", summary="Mes centres d'intérêt")
 async def my_interests(user: CurrentUser, session: SessionDep) -> dict[str, list[int]]:
     return {"interest_ids": await _interest_ids(session, user.id)}
+
+
+@router.get("/me/preferences", summary="Préférences d'affichage")
+async def read_preferences(user: CurrentUser, session: SessionDep) -> dict[str, object]:
+    profile = await session.get(Profile, user.id)
+    if profile is None:
+        raise NotFound("Profil introuvable.")
+    return {"preferences": profile.preferences or {}}
+
+
+@router.put("/me/preferences", summary="Enregistrer les préférences d'affichage")
+async def write_preferences(
+    payload: PreferencesIn, user: CurrentUser, session: SessionDep
+) -> dict[str, object]:
+    profile = await session.get(Profile, user.id)
+    if profile is None:
+        raise NotFound("Profil introuvable.")
+    profile.preferences = payload.model_dump()
+    await session.commit()
+    return {"preferences": profile.preferences}

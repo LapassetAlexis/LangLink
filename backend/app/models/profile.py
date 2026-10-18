@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime as dt
 import uuid
 
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
@@ -57,6 +58,9 @@ class Profile(Base):
     onboarding_done_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
     discoverable: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("false")
+    )
+    preferences: Mapped[dict[str, object]] = mapped_column(
+        JSONB, nullable=False, server_default=text("'{}'::jsonb"), default=dict
     )
     timezone: Mapped[str] = mapped_column(
         String(64), nullable=False, server_default=text("'Europe/Paris'")
