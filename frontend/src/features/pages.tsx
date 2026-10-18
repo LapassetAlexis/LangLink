@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   api,
   ApiError,
+  DEFAULT_PREFERENCES,
   type Candidate,
   type Conversation,
   type InterestGroup,
@@ -408,16 +409,58 @@ export function DiscoverPage() {
 export function InboxPage() {
   const [items, setItems] = useState<Conversation[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [tipOpen, setTipOpen] = useState(false)
 
   useEffect(() => {
     api
       .conversations()
       .then((data) => setItems(data.items))
       .catch((err) => setError(errorMessage(err)))
+    api
+      .preferences()
+      .then((stored) => setTipOpen(!(stored.preferences.hide_correspondence_tip ?? false)))
+      .catch(() => setTipOpen(true))
   }, [])
 
+  async function dismissTip() {
+    setTipOpen(false) // optimiste : l'utilisateur ne doit pas attendre le réseau
+    try {
+      const stored = await api.preferences()
+      await api.savePreferences({ ...DEFAULT_PREFERENCES, ...stored.preferences, hide_correspondence_tip: true })
+    } catch {
+      /* le bandeau reste masqué pour la session même si l'enregistrement échoue */
+    }
+  }
+
   return (
-    <div className="mx-auto grid max-w-5xl gap-8 px-5 py-8 lg:grid-cols-[minmax(0,420px)_1fr]">
+    <div className="mx-auto max-w-3xl px-5 py-8">
+      {tipOpen && (
+        <aside
+          className="relative mb-6 overflow-hidden rounded-3xl border border-white/[0.06] p-6 pr-12"
+          style={{
+            background:
+              'radial-gradient(120% 120% at 10% 0%, rgba(240,179,87,0.14), transparent 60%), radial-gradient(90% 90% at 95% 100%, rgba(111,211,192,0.12), transparent 55%), var(--ink-850)',
+          }}
+        >
+          <button
+            aria-label="Masquer ce bloc"
+            className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full text-white/40 transition hover:bg-white/10 hover:text-white"
+            onClick={() => void dismissTip()}
+          >
+            ✕
+          </button>
+          <p className="eyebrow">Correspondance</p>
+          <p className="display mt-2 text-xl leading-snug">
+            Chaque message est corrigé par une personne, jamais par une machine.
+          </p>
+          <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/55">
+            <li>Sélectionne un fil pour reprendre la discussion.</li>
+            <li>L&apos;heure affichée est celle de ton correspondant.</li>
+            <li>Survole un mot pour en demander le sens.</li>
+          </ul>
+        </aside>
+      )}
+
       <section>
         <header className="mb-5 flex items-baseline justify-between">
           <h1 className="display text-2xl">Conversations</h1>
@@ -499,40 +542,6 @@ export function InboxPage() {
         )}
       </section>
 
-      <aside className="hidden lg:block">
-        <div
-          className="relative overflow-hidden rounded-3xl border border-white/[0.06] p-8"
-          style={{
-            background:
-              'radial-gradient(120% 90% at 15% 0%, rgba(240,179,87,0.14), transparent 60%), radial-gradient(90% 80% at 90% 100%, rgba(111,211,192,0.12), transparent 55%), var(--ink-850)',
-          }}
-        >
-          <p className="eyebrow">Correspondance</p>
-          <p className="display mt-3 text-2xl leading-snug">
-            Chaque message est corrigé par une personne, jamais par une machine.
-          </p>
-          <ul className="mt-6 flex flex-col gap-3 text-sm text-white/55">
-            <li className="flex gap-3">
-              <span aria-hidden="true" className="text-brand-400">
-                ✳
-              </span>
-              Sélectionne un fil pour reprendre la discussion.
-            </li>
-            <li className="flex gap-3">
-              <span aria-hidden="true" className="text-brand-400">
-                ✳
-              </span>
-              L&apos;heure affichée est celle de ton correspondant.
-            </li>
-            <li className="flex gap-3">
-              <span aria-hidden="true" className="text-brand-400">
-                ✳
-              </span>
-              Survole un mot pour en demander le sens.
-            </li>
-          </ul>
-        </div>
-      </aside>
     </div>
   )
 }

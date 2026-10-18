@@ -88,3 +88,4 @@ class PreferencesIn(BaseModel):
     text_size: Literal["normal", "large"] = "normal"
     density: Literal["confort", "compact"] = "confort"
     motion: Literal["system", "reduce", "normal"] = "system"
+    hide_correspondence_tip: bool = False

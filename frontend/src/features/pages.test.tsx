@@ -20,6 +20,8 @@ const apiMock = vi.hoisted(() => ({
   markRead: vi.fn(),
   translate: vi.fn(),
   lexicon: vi.fn(),
+  preferences: vi.fn(),
+  savePreferences: vi.fn(),
   readingAid: vi.fn(),
   correct: vi.fn(),
   acceptCorrection: vi.fn(),
@@ -73,6 +75,8 @@ beforeEach(() => {
   apiMock.setInterests.mockResolvedValue({ ...STATE, step: 3, interest_ids: [1, 2, 3] })
   apiMock.messages.mockResolvedValue({ items: [], next_cursor: null })
   apiMock.markRead.mockResolvedValue({ unread_count: 0 })
+  apiMock.preferences.mockResolvedValue({ preferences: { hide_correspondence_tip: false } })
+  apiMock.savePreferences.mockResolvedValue({ preferences: { hide_correspondence_tip: true } })
   apiMock.complete.mockResolvedValue({ discoverable: true })
 })
 

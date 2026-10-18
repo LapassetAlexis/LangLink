@@ -147,6 +147,7 @@ export interface Preferences {
   text_size: 'normal' | 'large'
   density: 'confort' | 'compact'
   motion: 'system' | 'reduce' | 'normal'
+  hide_correspondence_tip: boolean
 }
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -155,6 +156,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   text_size: 'normal',
   density: 'confort',
   motion: 'system',
+  hide_correspondence_tip: false,
 }
 
 export interface ProfileOut {
