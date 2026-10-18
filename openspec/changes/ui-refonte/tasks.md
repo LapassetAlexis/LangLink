@@ -41,3 +41,4 @@
 
 - [x] 6.1 Coquille commune `AppShell` : en-tête collant, navigation (Découvrir / Messages / Mon compte), largeur bornée sur les formulaires — **vérif** : ✅ 3 vues authentifiées utilisent la même coquille, `tsc`/`lint`/`build` verts.
 - [x] 6.2 Liste de conversations : avatar à initiale, aperçu, heure relative, badge de non-lus, état vide avec action, colonne latérale éditoriale en `lg` — **vérif** : ✅ plus de lien bleu par défaut, aucune zone morte > 50 % sur écran large.
+- [x] 6.3 Tiroir d'assistance à la traduction dans le fil (`AssistDock`) : pastille repliée, saisie libre, traduction déterministe, mention du moteur, insertion dans le message — **vérif** : ✅ composant isolé, aucun modèle de langage, `tsc`/`lint`/`build` verts, 16 tests inchangés.

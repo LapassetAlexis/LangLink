@@ -13,6 +13,7 @@ import {
   type OnboardingState,
 } from '../lib/api'
 
+import { AssistDock } from '../components/AssistDock'
 import { LanguagePair } from '../components/LanguagePair'
 import { defaultTimezoneOf, labelOf, LANGUAGES } from '../lib/languages'
 import { levelLabel, levelOptions, levelTooltip } from '../lib/levels'
@@ -1014,6 +1015,11 @@ export function ChatPage() {
       )}
 
       {error && <p className="mt-2 text-sm text-red-300">{error}</p>}
+
+      <AssistDock
+        targetLang={detail.other?.native_language}
+        onInsert={(translated) => setDraft((current) => (current ? `${current} ${translated}` : translated))}
+      />
 
       <form
         className="mt-4 flex gap-2"

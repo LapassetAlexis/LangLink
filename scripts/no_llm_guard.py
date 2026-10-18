@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Garde-fou P2 : aucun client de modele generatif dans le produit.
+"""Garde-fou P2 : aucun client de modele de langage dans le produit.
+
+La regle n'est pas « zero IA » mais « aucun interlocuteur artificiel » : tout message
+echange est ecrit par un humain. L'assistance (traduction, dictionnaire, analyse
+morphologique) reste autorisee, a condition d'etre deterministe et de dire sa source.
+En pratique l'interdit est global : aucun LLM, ni pour parler, ni pour assister.
 
 La contrainte « aucune IA generative » de `core.spec.md` (P2) est une contrainte de
 produit : elle doit etre verifiee mecaniquement, sinon ce n'est qu'une intention.
